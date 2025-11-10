@@ -1,0 +1,180 @@
+(1) User-Side Features
+
+{A} Mode Switching
+
+[1] Switch between:
+
+(a) Online Mode → Standard eCommerce like Flipkart
+
+(b) Local Mode → Nearby store-based results like Zepto
+
+<Auto-detect user location & suggest nearby availability>
+
+{B} Product Availability
+
+[1] Check:
+
+(a) If product available in local stores
+
+(b) Nearby store stock count
+
+(c) Estimated delivery/pickup time
+
+[2] Real-time updates through shop APIs
+
+{C} Custom Path Creation
+
+[1] User can:
+
+(a) Add multiple stops
+
+(b) Set destination route
+
+(c) Get optimized path to buy multiple products
+
+[2] Integration with map & location filters
+
+[3] Save and reuse routes
+
+{D} Filtering & Prioritization
+
+[1] Filter by:
+
+(a) Distance
+
+(b) Price
+
+(c) Rating
+
+(d) Stock Availability
+
+(e) Delivery Time
+
+[2] Sort results dynamically
+
+{E} Shop Selection Options
+
+[1] Choose:
+
+(a) Specific preferred shops
+
+(b) Multi-store cart
+
+[2] Compare multiple store offers
+
+{F} Purchase Options
+
+[1] Two main modes:
+
+(a) Go for Purchase Item (direct order + delivery)
+
+(b) Order & Pick (reserve and pick manually)
+
+[2] Add-on features:
+
+<Scheduled Pickup>
+<Group Pickup for multiple orders>
+
+{G} Smart Notifications
+
+[1] Price drop alerts
+
+[2] Restock notifications
+
+[3] Route change alerts
+
+[4] Order ready notifications
+
+(2) Shop Owner / Seller Features
+
+{A} Inventory Management
+
+[1] Add / Remove / Update stock
+
+[2] Auto-sync between offline & online inventory
+
+[3] Out-of-stock alert system
+
+[4] Choose how much to list online
+
+{B} Store Visibility Control
+
+[1] Local Mode Listing Preferences
+
+[2] Store availability toggle (Open / Closed / Maintenance)
+
+{C} Analytics Dashboard
+
+[1] Sales insights
+
+[2] Local customer trends
+
+[3] Performance by category / time
+
+{D} Delivery & Pickup Management
+
+[1] Integrate local delivery partners
+
+[2] Schedule customer pickups
+
+[3] Manage delivery radius and fees
+
+(3) Admin & System Services
+
+{A} AI-Powered Recommendation System
+
+[1] Suggests nearby stores
+
+[2] Product alternatives
+
+[3] Smart combo offers
+
+{B} Map & Navigation API Integration
+
+[1] Route optimization
+
+[2] Traffic-aware delivery ETA
+
+[3] Custom path mapping
+
+{C} Payment & Security
+
+[1] Multi-payment support (UPI, Card, Wallets, COD)
+
+[2] Secure transactions (SSL, OTP, Tokenized Payments)
+
+{D} Customer Support
+
+[1] Live chat + Bot assistant
+
+[2] Ticket-based query system
+
+[3] Order dispute resolution
+
+{E} Data & Personalization
+
+[1] User behavior tracking
+
+[2] Personalized offers
+
+[3] Localized language and theme support
+
+(4) Extra Services
+
+{A} Subscription Plan
+
+[1] Prime-like features (Free delivery / Cashback)
+
+[2] Business memberships for shop owners
+
+{B} Green Route Option
+
+[1] Eco-friendly pickup suggestions
+
+[2] Minimal fuel route optimization
+
+{C} Community & Loyalty
+
+[1] Points & reward system
+
+[2] Local shop collaboration programs
