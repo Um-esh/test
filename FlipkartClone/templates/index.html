@@ -73,9 +73,11 @@
                             {% endif %}
                             <div class="product-price">₹{{ product.price }}</div>
                         </div>
-                        <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('{{ product.product_id }}')">
-                            <i class="fas fa-cart-plus"></i> Add to Cart
-                        </button>
+                        <div class="cart-actions" id="cart-actions-{{ product.product_id }}">
+                            <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('{{ product.product_id }}')">
+                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            </button>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -148,9 +150,11 @@
                         <div class="product-price">₹{{ product.price }}</div>
                         <div class="product-category">{{ product.category }}</div>
                     </div>
-                    <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('{{ product.product_id }}')">
-                        <i class="fas fa-cart-plus"></i> Add to Cart
-                    </button>
+                    <div class="cart-actions" id="cart-actions-{{ product.product_id }}">
+                        <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('{{ product.product_id }}')">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -313,6 +317,7 @@ async function addToCart(productId) {
         
         if (data.success) {
             showNotification(data.message, 'success');
+            updateCartButton(productId, 1);
         } else {
             if (response.status === 401) {
                 window.location.href = '/login';
@@ -324,5 +329,94 @@ async function addToCart(productId) {
         showNotification('Failed to add to cart', 'error');
     }
 }
+
+function updateCartButton(productId, quantity) {
+    const container = document.getElementById(`cart-actions-${productId}`);
+    if (container) {
+        container.innerHTML = `
+            <div class="cart-quantity-control">
+                <button class="cart-qty-btn" onclick="event.stopPropagation(); updateQuantity('${productId}', ${quantity - 1})">−</button>
+                <span class="cart-qty-display">${quantity} in cart</span>
+                <button class="cart-qty-btn" onclick="event.stopPropagation(); updateQuantity('${productId}', ${quantity + 1})">+</button>
+            </div>
+        `;
+    }
+}
+
+async function updateQuantity(productId, newQuantity) {
+    if (newQuantity < 1) {
+        if (confirm('Remove this item from cart?')) {
+            await removeFromCart(productId);
+        }
+        return;
+    }
+    
+    try {
+        const response = await fetch('/cart/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ product_id: productId, quantity: newQuantity })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            updateCartButton(productId, newQuantity);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('Failed to update quantity', 'error');
+    }
+}
+
+async function removeFromCart(productId) {
+    try {
+        const response = await fetch(`/cart/remove-by-product/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const container = document.getElementById(`cart-actions-${productId}`);
+            if (container) {
+                container.innerHTML = `
+                    <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('${productId}')">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                `;
+            }
+            showNotification(data.message, 'success');
+        }
+    } catch (error) {
+        showNotification('Failed to remove item', 'error');
+    }
+}
+
+async function checkCartStatus() {
+    {% if user %}
+    const productCards = document.querySelectorAll('.product-card');
+    for (const card of productCards) {
+        const productId = card.querySelector('.cart-actions').id.replace('cart-actions-', '');
+        try {
+            const response = await fetch(`/cart/check/${productId}`);
+            const data = await response.json();
+            if (data.in_cart) {
+                updateCartButton(productId, data.quantity);
+            }
+        } catch (error) {
+            console.error('Failed to check cart status:', error);
+        }
+    }
+    {% endif %}
+}
+
+document.addEventListener('DOMContentLoaded', checkCartStatus);
 </script>
 {% endblock %}

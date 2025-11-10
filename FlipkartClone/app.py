@@ -632,6 +632,29 @@ def check_cart(product_id):
     else:
         return jsonify({'in_cart': False})
 
+@app.route('/cart/update', methods=['POST'])
+def update_cart():
+    user = get_current_user()
+
+    if not user:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    data = request.json
+    product_id = data.get('product_id')
+    quantity = data.get('quantity', 1)
+
+    if quantity < 1:
+        return jsonify({'success': False, 'message': 'Quantity must be at least 1'})
+
+    cart_item = Cart.query.filter_by(user_id=user['user_id'], product_id=product_id).first()
+    
+    if cart_item:
+        cart_item.quantity = quantity
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Cart updated!', 'quantity': quantity})
+    else:
+        return jsonify({'success': False, 'message': 'Item not in cart'})
+
 @app.route('/cart/remove/<int:cart_id>', methods=['POST'])
 def remove_from_cart(cart_id):
     user = get_current_user()
@@ -645,6 +668,21 @@ def remove_from_cart(cart_id):
         db.session.commit()
 
     return jsonify({'success': True, 'message': 'Removed from cart'})
+
+@app.route('/cart/remove-by-product/<product_id>', methods=['POST'])
+def remove_by_product(product_id):
+    user = get_current_user()
+
+    if not user:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    cart_item = Cart.query.filter_by(user_id=user['user_id'], product_id=product_id).first()
+    if cart_item:
+        db.session.delete(cart_item)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Removed from cart'})
+    
+    return jsonify({'success': False, 'message': 'Item not found'})
 
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
