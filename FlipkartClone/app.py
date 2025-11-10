@@ -23,8 +23,8 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
 app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
-app.config['MAIL_USERNAME'] = 'srms.inventory@gmail.com'
-app.config['MAIL_PASSWORD'] = 'ilslkasxuyqcqnke'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@buddyshop.com')
 
 db.init_app(app)
@@ -534,6 +534,9 @@ def update_product(product_id):
         product.price = float(data['price'])
     if 'stock' in data:
         product.stock = int(data['stock'])
+    if 'online_stock' in data:
+        online_stock_value = max(0, min(int(data['online_stock']), product.stock))
+        product.online_stock = online_stock_value
     if 'is_visible' in data:
         product.is_visible = int(data['is_visible'])
     if 'expiry_date' in data:

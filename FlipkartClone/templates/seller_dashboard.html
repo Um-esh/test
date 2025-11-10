@@ -87,7 +87,16 @@
                 <h3>{{ product.name }}</h3>
                 <p class="product-description">{{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}</p>
                 <div class="product-price">₹{{ product.price }}</div>
-                <div class="product-stock">Stock: {{ product.stock }}</div>
+                <div class="product-stock">Total: {{ product.stock }} | Online: {{ product.online_stock or 0 }}</div>
+                <div class="product-actions">
+                    <label class="toggle-label">
+                        <input type="checkbox" {% if product.is_visible %}checked{% endif %} onchange="toggleVisibility('{{ product.product_id }}', this.checked)">
+                        <span>Visible</span>
+                    </label>
+                    <input type="number" value="{{ product.online_stock or 0 }}" min="0" max="{{ product.stock }}" 
+                           onchange="updateOnlineStock('{{ product.product_id }}', this.value)" 
+                           placeholder="Online Stock" style="width: 100px; padding: 5px; margin: 5px;">
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -153,6 +162,42 @@ function getMyLocation() {
         );
     } else {
         showNotification('Geolocation is not supported by your browser', 'error');
+    }
+}
+
+async function toggleVisibility(productId, isVisible) {
+    try {
+        const response = await fetch(`/seller/update-product/${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_visible: isVisible ? 1 : 0 })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showNotification(data.message, 'success');
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('Failed to update visibility', 'error');
+    }
+}
+
+async function updateOnlineStock(productId, onlineStock) {
+    try {
+        const response = await fetch(`/seller/update-product/${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ online_stock: parseInt(onlineStock) })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showNotification(data.message, 'success');
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('Failed to update online stock', 'error');
     }
 }
 </script>

@@ -11,69 +11,128 @@ import json
 
 CATEGORIES = [
     'Groceries', 'Electronics', 'Fashion', 'Home & Kitchen', 
-    'Beauty & Personal Care', 'Sports & Fitness', 'Books', 'Toys'
+    'Beauty & Personal Care', 'Sports & Fitness', 'Books', 'Toys',
+    'Automotive', 'Health & Wellness', 'Office Supplies', 'Pet Supplies'
 ]
 
 CITIES = [
+    {'name': 'Bareilly', 'lat': 28.3670, 'lng': 79.4304},
     {'name': 'Mumbai', 'lat': 19.076, 'lng': 72.877},
     {'name': 'Delhi', 'lat': 28.704, 'lng': 77.102},
     {'name': 'Bangalore', 'lat': 12.972, 'lng': 77.594},
     {'name': 'Pune', 'lat': 18.520, 'lng': 73.857},
-    {'name': 'Hyderabad', 'lat': 17.385, 'lng': 78.487}
 ]
 
-PRODUCTS = {
-    'Groceries': [
-        {'name': 'Organic Bananas', 'price': 40, 'desc': 'Fresh organic bananas, rich in potassium', 'img': 'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=500&h=500&fit=crop'},
-        {'name': 'Whole Wheat Bread', 'price': 45, 'desc': 'Freshly baked whole wheat bread', 'img': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&h=500&fit=crop'},
-        {'name': 'Fresh Milk (1L)', 'price': 60, 'desc': 'Farm fresh full cream milk', 'img': 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&h=500&fit=crop'},
-        {'name': 'Basmati Rice (5kg)', 'price': 450, 'desc': 'Premium quality basmati rice', 'img': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=500&h=500&fit=crop'},
-        {'name': 'Organic Eggs (12pcs)', 'price': 90, 'desc': 'Cage-free organic eggs', 'img': 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=500&h=500&fit=crop'},
-        {'name': 'Mixed Vegetables', 'price': 80, 'desc': 'Fresh seasonal vegetables', 'img': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&h=500&fit=crop'},
-        {'name': 'Greek Yogurt', 'price': 75, 'desc': 'Creamy Greek yogurt', 'img': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=500&h=500&fit=crop'},
-        {'name': 'Olive Oil (500ml)', 'price': 350, 'desc': 'Extra virgin olive oil', 'img': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&h=500&fit=crop'},
-    ],
-    'Electronics': [
-        {'name': 'Wireless Mouse', 'price': 599, 'desc': 'Ergonomic wireless mouse with USB receiver', 'img': 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&h=500&fit=crop'},
-        {'name': 'Bluetooth Headphones', 'price': 1499, 'desc': 'Over-ear wireless headphones with noise cancellation', 'img': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&h=500&fit=crop'},
-        {'name': 'Phone Charger', 'price': 299, 'desc': 'Fast charging USB-C charger', 'img': 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500&h=500&fit=crop'},
-        {'name': 'Laptop Stand', 'price': 899, 'desc': 'Adjustable aluminum laptop stand', 'img': 'https://images.unsplash.com/photo-1625948515291-69613efd103f?w=500&h=500&fit=crop'},
-        {'name': 'USB Hub', 'price': 699, 'desc': '7-port USB 3.0 hub', 'img': 'https://images.unsplash.com/photo-1625948515291-69613efd103f?w=500&h=500&fit=crop'},
-        {'name': 'Webcam HD', 'price': 2499, 'desc': '1080p HD webcam with microphone', 'img': 'https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=500&h=500&fit=crop'},
-    ],
-    'Fashion': [
-        {'name': 'Cotton T-Shirt', 'price': 399, 'desc': 'Comfortable 100% cotton t-shirt', 'img': 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop'},
-        {'name': 'Denim Jeans', 'price': 1299, 'desc': 'Classic fit denim jeans', 'img': 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&h=500&fit=crop'},
-        {'name': 'Running Shoes', 'price': 2499, 'desc': 'Lightweight running shoes', 'img': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop'},
-        {'name': 'Leather Wallet', 'price': 799, 'desc': 'Genuine leather bifold wallet', 'img': 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=500&h=500&fit=crop'},
-        {'name': 'Sunglasses', 'price': 599, 'desc': 'UV protection sunglasses', 'img': 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&h=500&fit=crop'},
-        {'name': 'Winter Jacket', 'price': 3499, 'desc': 'Warm winter jacket with hood', 'img': 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&h=500&fit=crop'},
-    ],
-    'Home & Kitchen': [
-        {'name': 'Non-Stick Cookware Set', 'price': 2999, 'desc': '5-piece non-stick cookware set', 'img': 'https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?w=500&h=500&fit=crop'},
-        {'name': 'Mixer Grinder', 'price': 3499, 'desc': '750W mixer grinder with 3 jars', 'img': 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=500&h=500&fit=crop'},
-        {'name': 'Bed Sheet Set', 'price': 1299, 'desc': 'Premium cotton bed sheet set', 'img': 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500&h=500&fit=crop'},
-        {'name': 'Table Lamp', 'price': 699, 'desc': 'LED table lamp with dimmer', 'img': 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&h=500&fit=crop'},
-        {'name': 'Wall Clock', 'price': 499, 'desc': 'Silent wall clock', 'img': 'https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=500&h=500&fit=crop'},
-    ],
-    'Beauty & Personal Care': [
-        {'name': 'Face Wash', 'price': 249, 'desc': 'Gentle face wash for all skin types', 'img': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&h=500&fit=crop'},
-        {'name': 'Shampoo (200ml)', 'price': 299, 'desc': 'Anti-dandruff shampoo', 'img': 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500&h=500&fit=crop'},
-        {'name': 'Body Lotion', 'price': 349, 'desc': 'Moisturizing body lotion', 'img': 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&h=500&fit=crop'},
-        {'name': 'Perfume', 'price': 999, 'desc': 'Long-lasting EDT perfume', 'img': 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&h=500&fit=crop'},
-    ],
-    'Sports & Fitness': [
-        {'name': 'Yoga Mat', 'price': 599, 'desc': 'Anti-slip yoga mat with carry bag', 'img': 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=500&h=500&fit=crop'},
-        {'name': 'Dumbbells (5kg pair)', 'price': 899, 'desc': 'Rubber-coated dumbbells', 'img': 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500&h=500&fit=crop'},
-        {'name': 'Resistance Bands', 'price': 399, 'desc': 'Set of 3 resistance bands', 'img': 'https://images.unsplash.com/photo-1598289431512-b97b0917affc?w=500&h=500&fit=crop'},
-        {'name': 'Water Bottle', 'price': 299, 'desc': '1L insulated water bottle', 'img': 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=500&h=500&fit=crop'},
-    ]
-}
+PRODUCTS_CATALOG = [
+    {'cat': 'Groceries', 'name': 'Organic Bananas', 'price': 40, 'desc': 'Fresh organic bananas'},
+    {'cat': 'Groceries', 'name': 'Whole Wheat Bread', 'price': 45, 'desc': 'Freshly baked bread'},
+    {'cat': 'Groceries', 'name': 'Fresh Milk 1L', 'price': 60, 'desc': 'Farm fresh milk'},
+    {'cat': 'Groceries', 'name': 'Basmati Rice 5kg', 'price': 450, 'desc': 'Premium basmati rice'},
+    {'cat': 'Groceries', 'name': 'Organic Eggs 12pcs', 'price': 90, 'desc': 'Cage-free eggs'},
+    {'cat': 'Groceries', 'name': 'Mixed Vegetables', 'price': 80, 'desc': 'Fresh seasonal vegetables'},
+    {'cat': 'Groceries', 'name': 'Greek Yogurt', 'price': 75, 'desc': 'Creamy yogurt'},
+    {'cat': 'Groceries', 'name': 'Olive Oil 500ml', 'price': 350, 'desc': 'Extra virgin'},
+    {'cat': 'Groceries', 'name': 'Tomatoes 1kg', 'price': 30, 'desc': 'Fresh red tomatoes'},
+    {'cat': 'Groceries', 'name': 'Onions 1kg', 'price': 25, 'desc': 'Quality onions'},
+    {'cat': 'Groceries', 'name': 'Potatoes 1kg', 'price': 20, 'desc': 'Fresh potatoes'},
+    {'cat': 'Groceries', 'name': 'Green Chili', 'price': 40, 'desc': 'Spicy green chili'},
+    {'cat': 'Groceries', 'name': 'Ginger 250g', 'price': 60, 'desc': 'Fresh ginger'},
+    {'cat': 'Groceries', 'name': 'Garlic 250g', 'price': 50, 'desc': 'Quality garlic'},
+    {'cat': 'Groceries', 'name': 'Coriander Leaves', 'price': 15, 'desc': 'Fresh coriander'},
+    {'cat': 'Groceries', 'name': 'Mint Leaves', 'price': 10, 'desc': 'Fresh mint'},
+    {'cat': 'Groceries', 'name': 'Apples 1kg', 'price': 120, 'desc': 'Kashmiri apples'},
+    {'cat': 'Groceries', 'name': 'Oranges 1kg', 'price': 60, 'desc': 'Juicy oranges'},
+    {'cat': 'Groceries', 'name': 'Mangoes 1kg', 'price': 150, 'desc': 'Alphonso mangoes'},
+    {'cat': 'Groceries', 'name': 'Grapes 500g', 'price': 70, 'desc': 'Seedless grapes'},
+    {'cat': 'Electronics', 'name': 'Wireless Mouse', 'price': 599, 'desc': 'Ergonomic mouse'},
+    {'cat': 'Electronics', 'name': 'Bluetooth Headphones', 'price': 1499, 'desc': 'Noise cancellation'},
+    {'cat': 'Electronics', 'name': 'Phone Charger', 'price': 299, 'desc': 'Fast charging USB-C'},
+    {'cat': 'Electronics', 'name': 'Laptop Stand', 'price': 899, 'desc': 'Adjustable stand'},
+    {'cat': 'Electronics', 'name': 'USB Hub', 'price': 699, 'desc': '7-port USB 3.0'},
+    {'cat': 'Electronics', 'name': 'Webcam HD', 'price': 2499, 'desc': '1080p webcam'},
+    {'cat': 'Electronics', 'name': 'Keyboard Wireless', 'price': 1299, 'desc': 'Mechanical keyboard'},
+    {'cat': 'Electronics', 'name': 'LED Monitor 24inch', 'price': 8999, 'desc': 'Full HD display'},
+    {'cat': 'Electronics', 'name': 'Power Bank 10000mAh', 'price': 999, 'desc': 'Fast charging'},
+    {'cat': 'Electronics', 'name': 'USB Cable 3pack', 'price': 299, 'desc': 'Durable cables'},
+    {'cat': 'Electronics', 'name': 'Phone Stand', 'price': 199, 'desc': 'Adjustable holder'},
+    {'cat': 'Electronics', 'name': 'Earbuds TWS', 'price': 1999, 'desc': 'True wireless'},
+    {'cat': 'Electronics', 'name': 'Smart Watch', 'price': 2999, 'desc': 'Fitness tracker'},
+    {'cat': 'Electronics', 'name': 'Tablet 10inch', 'price': 12999, 'desc': 'Android tablet'},
+    {'cat': 'Fashion', 'name': 'Cotton T-Shirt', 'price': 399, 'desc': '100% cotton'},
+    {'cat': 'Fashion', 'name': 'Denim Jeans', 'price': 1299, 'desc': 'Classic fit'},
+    {'cat': 'Fashion', 'name': 'Running Shoes', 'price': 2499, 'desc': 'Lightweight'},
+    {'cat': 'Fashion', 'name': 'Leather Wallet', 'price': 799, 'desc': 'Genuine leather'},
+    {'cat': 'Fashion', 'name': 'Sunglasses', 'price': 599, 'desc': 'UV protection'},
+    {'cat': 'Fashion', 'name': 'Winter Jacket', 'price': 3499, 'desc': 'Warm jacket'},
+    {'cat': 'Fashion', 'name': 'Formal Shirt', 'price': 899, 'desc': 'Office wear'},
+    {'cat': 'Fashion', 'name': 'Sports Shoes', 'price': 1899, 'desc': 'Athletic shoes'},
+    {'cat': 'Fashion', 'name': 'Casual Sneakers', 'price': 1599, 'desc': 'Daily wear'},
+    {'cat': 'Fashion', 'name': 'Belt Leather', 'price': 499, 'desc': 'Formal belt'},
+    {'cat': 'Fashion', 'name': 'Cap Baseball', 'price': 299, 'desc': 'Sports cap'},
+    {'cat': 'Fashion', 'name': 'Socks Pack of 5', 'price': 249, 'desc': 'Cotton socks'},
+    {'cat': 'Home & Kitchen', 'name': 'Cookware Set', 'price': 2999, 'desc': '5-piece non-stick'},
+    {'cat': 'Home & Kitchen', 'name': 'Mixer Grinder', 'price': 3499, 'desc': '750W 3 jars'},
+    {'cat': 'Home & Kitchen', 'name': 'Bed Sheet Set', 'price': 1299, 'desc': 'Cotton bedsheet'},
+    {'cat': 'Home & Kitchen', 'name': 'Table Lamp', 'price': 699, 'desc': 'LED lamp'},
+    {'cat': 'Home & Kitchen', 'name': 'Wall Clock', 'price': 499, 'desc': 'Silent clock'},
+    {'cat': 'Home & Kitchen', 'name': 'Dinner Set 24pc', 'price': 1999, 'desc': 'Ceramic set'},
+    {'cat': 'Home & Kitchen', 'name': 'Pressure Cooker 5L', 'price': 1599, 'desc': 'Aluminum cooker'},
+    {'cat': 'Home & Kitchen', 'name': 'Water Purifier', 'price': 8999, 'desc': 'RO purifier'},
+    {'cat': 'Beauty & Personal Care', 'name': 'Face Wash', 'price': 249, 'desc': 'For all skin types'},
+    {'cat': 'Beauty & Personal Care', 'name': 'Shampoo 200ml', 'price': 299, 'desc': 'Anti-dandruff'},
+    {'cat': 'Beauty & Personal Care', 'name': 'Body Lotion', 'price': 349, 'desc': 'Moisturizing'},
+    {'cat': 'Beauty & Personal Care', 'name': 'Perfume EDT', 'price': 999, 'desc': 'Long-lasting'},
+    {'cat': 'Beauty & Personal Care', 'name': 'Hair Oil 200ml', 'price': 199, 'desc': 'Herbal oil'},
+    {'cat': 'Beauty & Personal Care', 'name': 'Face Cream', 'price': 399, 'desc': 'Day cream'},
+    {'cat': 'Beauty & Personal Care', 'name': 'Soap Pack of 3', 'price': 150, 'desc': 'Herbal soap'},
+    {'cat': 'Beauty & Personal Care', 'name': 'Toothpaste 200g', 'price': 120, 'desc': 'Dental care'},
+    {'cat': 'Sports & Fitness', 'name': 'Yoga Mat', 'price': 599, 'desc': 'Anti-slip mat'},
+    {'cat': 'Sports & Fitness', 'name': 'Dumbbells 5kg pair', 'price': 899, 'desc': 'Rubber-coated'},
+    {'cat': 'Sports & Fitness', 'name': 'Resistance Bands', 'price': 399, 'desc': 'Set of 3'},
+    {'cat': 'Sports & Fitness', 'name': 'Water Bottle 1L', 'price': 299, 'desc': 'Insulated'},
+    {'cat': 'Sports & Fitness', 'name': 'Skipping Rope', 'price': 199, 'desc': 'Adjustable'},
+    {'cat': 'Sports & Fitness', 'name': 'Gym Bag', 'price': 899, 'desc': 'Sports bag'},
+    {'cat': 'Sports & Fitness', 'name': 'Cricket Bat', 'price': 1999, 'desc': 'Willow bat'},
+    {'cat': 'Sports & Fitness', 'name': 'Badminton Racket', 'price': 1299, 'desc': 'Lightweight'},
+    {'cat': 'Books', 'name': 'Fiction Novel', 'price': 299, 'desc': 'Bestseller'},
+    {'cat': 'Books', 'name': 'Self Help Book', 'price': 349, 'desc': 'Motivational'},
+    {'cat': 'Books', 'name': 'Cookbook', 'price': 399, 'desc': 'Indian recipes'},
+    {'cat': 'Books', 'name': 'Kids Story Book', 'price': 199, 'desc': 'Illustrated'},
+    {'cat': 'Books', 'name': 'Dictionary', 'price': 449, 'desc': 'English-Hindi'},
+    {'cat': 'Books', 'name': 'Notebook Set', 'price': 249, 'desc': 'Pack of 5'},
+    {'cat': 'Toys', 'name': 'Building Blocks', 'price': 599, 'desc': '100 pieces'},
+    {'cat': 'Toys', 'name': 'Remote Car', 'price': 899, 'desc': 'RC car'},
+    {'cat': 'Toys', 'name': 'Puzzle Game', 'price': 399, 'desc': '1000 pieces'},
+    {'cat': 'Toys', 'name': 'Soft Teddy Bear', 'price': 499, 'desc': 'Plush toy'},
+    {'cat': 'Toys', 'name': 'Board Game', 'price': 699, 'desc': 'Family game'},
+    {'cat': 'Toys', 'name': 'Action Figure', 'price': 799, 'desc': 'Superhero'},
+    {'cat': 'Automotive', 'name': 'Car Phone Holder', 'price': 299, 'desc': 'Dashboard mount'},
+    {'cat': 'Automotive', 'name': 'Car Vacuum Cleaner', 'price': 1299, 'desc': 'Portable'},
+    {'cat': 'Automotive', 'name': 'Tire Pressure Gauge', 'price': 199, 'desc': 'Digital'},
+    {'cat': 'Automotive', 'name': 'Car Perfume', 'price': 149, 'desc': 'Long-lasting'},
+    {'cat': 'Automotive', 'name': 'Jump Starter', 'price': 2999, 'desc': 'Emergency kit'},
+    {'cat': 'Health & Wellness', 'name': 'Vitamin C Tablets', 'price': 299, 'desc': '60 tablets'},
+    {'cat': 'Health & Wellness', 'name': 'Protein Powder', 'price': 1999, 'desc': '1kg pack'},
+    {'cat': 'Health & Wellness', 'name': 'First Aid Kit', 'price': 599, 'desc': 'Complete kit'},
+    {'cat': 'Health & Wellness', 'name': 'Digital Thermometer', 'price': 199, 'desc': 'Infrared'},
+    {'cat': 'Health & Wellness', 'name': 'Blood Pressure Monitor', 'price': 1499, 'desc': 'Digital'},
+    {'cat': 'Office Supplies', 'name': 'Pen Set 10pcs', 'price': 149, 'desc': 'Ball pens'},
+    {'cat': 'Office Supplies', 'name': 'A4 Paper 500 sheets', 'price': 299, 'desc': 'Printing paper'},
+    {'cat': 'Office Supplies', 'name': 'Stapler', 'price': 199, 'desc': 'Heavy duty'},
+    {'cat': 'Office Supplies', 'name': 'File Folders 10pc', 'price': 249, 'desc': 'Document folders'},
+    {'cat': 'Office Supplies', 'name': 'Desk Organizer', 'price': 599, 'desc': 'Multi-compartment'},
+    {'cat': 'Pet Supplies', 'name': 'Dog Food 3kg', 'price': 899, 'desc': 'Premium food'},
+    {'cat': 'Pet Supplies', 'name': 'Cat Litter 5kg', 'price': 499, 'desc': 'Odor control'},
+    {'cat': 'Pet Supplies', 'name': 'Pet Bowl Set', 'price': 299, 'desc': 'Stainless steel'},
+    {'cat': 'Pet Supplies', 'name': 'Dog Collar', 'price': 249, 'desc': 'Adjustable'},
+    {'cat': 'Pet Supplies', 'name': 'Pet Toy Ball', 'price': 149, 'desc': 'Rubber ball'},
+]
 
 SHOP_NAMES = [
     'Fresh Mart', 'Quick Stop', 'City Store', 'Smart Shop', 'Easy Buy',
     'Metro Bazaar', 'Corner Shop', 'Daily Needs', 'Express Store', 'Local Market',
-    'Super Save', 'Prime Retail', 'Best Buy Store', 'Value Shop', 'Mega Mart'
+    'Super Save', 'Prime Retail', 'Best Buy Store', 'Value Shop', 'Mega Mart',
+    'Happy Store', 'Top Shop', 'Quality Bazaar', 'Trade Point', 'Shop Hub'
 ]
 
 REVIEWS_COMMENTS = {
@@ -85,7 +144,6 @@ REVIEWS_COMMENTS = {
 }
 
 def generate_nearby_coordinates(base_lat, base_lng, radius_km=5):
-    """Generate coordinates within radius"""
     offset_lat = (random.random() - 0.5) * (radius_km / 111.0) * 2
     offset_lng = (random.random() - 0.5) * (radius_km / (111.0 * 0.9)) * 2
     return base_lat + offset_lat, base_lng + offset_lng
@@ -102,21 +160,50 @@ def seed_data():
         User.query.filter_by(user_type='buyer').delete()
         db.session.commit()
         
-        print("Creating sellers...")
+        print("Creating 15 sellers (exactly 3 from Bareilly, UP)...")
         sellers = []
-        for idx, city in enumerate(CITIES):
-            for shop_idx in range(3):
-                shop_lat, shop_lng = generate_nearby_coordinates(city['lat'], city['lng'], radius_km=8)
-                seller_id = f"SELLER{idx+1}{shop_idx+1}"
+        seller_counter = 1
+        
+        for i in range(3):
+            city = CITIES[0]
+            shop_lat, shop_lng = generate_nearby_coordinates(city['lat'], city['lng'], radius_km=8)
+            seller_id = f"SELLER{seller_counter:03d}"
+            
+            seller = User(
+                user_id=seller_id,
+                email=f"seller{seller_counter}@buddyshop.com",
+                password_hash=generate_password_hash('seller123'),
+                full_name=f"Seller {seller_counter}",
+                phone=f"98765{random.randint(10000, 99999)}",
+                user_type='seller',
+                login_status=0,
+                shop_name=f"{random.choice(SHOP_NAMES)} - {city['name']}",
+                shop_address=f"{random.randint(1, 999)} Civil Lines, {city['name']}, Uttar Pradesh",
+                shop_latitude=shop_lat,
+                shop_longitude=shop_lng,
+                shop_city=city['name'],
+                shop_pincode=f"2430{random.randint(10, 99)}"
+            )
+            db.session.add(seller)
+            sellers.append(seller)
+            seller_counter += 1
+        
+        for city_idx in range(1, len(CITIES)):
+            city = CITIES[city_idx]
+            sellers_in_city = 3
+            
+            for shop_idx in range(sellers_in_city):
+                shop_lat, shop_lng = generate_nearby_coordinates(city['lat'], city['lng'], radius_km=10)
+                seller_id = f"SELLER{seller_counter:03d}"
                 
                 seller = User(
                     user_id=seller_id,
-                    email=f"seller{idx+1}{shop_idx+1}@buddyshop.com",
+                    email=f"seller{seller_counter}@buddyshop.com",
                     password_hash=generate_password_hash('seller123'),
-                    full_name=f"Seller {idx+1}{shop_idx+1}",
+                    full_name=f"Seller {seller_counter}",
                     phone=f"98765{random.randint(10000, 99999)}",
                     user_type='seller',
-                    login_status=1,
+                    login_status=0,
                     shop_name=f"{random.choice(SHOP_NAMES)} - {city['name']}",
                     shop_address=f"{random.randint(1, 999)} MG Road, {city['name']}",
                     shop_latitude=shop_lat,
@@ -126,14 +213,55 @@ def seed_data():
                 )
                 db.session.add(seller)
                 sellers.append(seller)
+                seller_counter += 1
         
         db.session.commit()
         print(f"Created {len(sellers)} sellers")
         
-        print("Creating buyers...")
+        print("Creating ~1000 products...")
+        products = []
+        product_counter = 1
+        
+        while product_counter <= 1000:
+            seller = random.choice(sellers)
+            prod_data = random.choice(PRODUCTS_CATALOG)
+            
+            product_id = f"PROD{product_counter:04d}"
+            total_stock = random.randint(10, 200)
+            online_stock = random.randint(int(total_stock * 0.3), total_stock)
+            
+            price_variation = random.randint(-30, 50)
+            final_price = max(prod_data['price'] + price_variation, 10)
+            
+            product = Product(
+                product_id=product_id,
+                seller_id=seller.user_id,
+                name=prod_data['name'],
+                description=prod_data['desc'],
+                category=prod_data['cat'],
+                price=final_price,
+                stock=total_stock,
+                online_stock=online_stock,
+                images=json.dumps([f"https://via.placeholder.com/500x500?text={prod_data['name'].replace(' ', '+')}"]),
+                is_visible=1,
+                rating=0.0,
+                rating_count=0
+            )
+            db.session.add(product)
+            products.append(product)
+            product_counter += 1
+            
+            if product_counter % 100 == 0:
+                db.session.commit()
+                print(f"Created {product_counter} products...")
+        
+        db.session.commit()
+        print(f"Created {len(products)} products")
+        
+        print("Creating sample buyers...")
         buyers = []
-        for i in range(10):
-            buyer_id = f"BUYER{i+1}"
+        for i in range(20):
+            buyer_id = f"BUYER{i+1:03d}"
             buyer = User(
                 user_id=buyer_id,
                 email=f"buyer{i+1}@buddyshop.com",
@@ -141,7 +269,7 @@ def seed_data():
                 full_name=f"Buyer {i+1}",
                 phone=f"98765{random.randint(10000, 99999)}",
                 user_type='buyer',
-                login_status=1
+                login_status=0
             )
             db.session.add(buyer)
             buyers.append(buyer)
@@ -149,50 +277,10 @@ def seed_data():
         db.session.commit()
         print(f"Created {len(buyers)} buyers")
         
-        print("Creating products...")
-        products = []
-        product_counter = 1
-        
-        for seller in sellers:
-            num_products = random.randint(5, 12)
-            seller_categories = random.sample(list(PRODUCTS.keys()), min(3, len(PRODUCTS)))
-            
-            for category in seller_categories:
-                category_products = random.sample(PRODUCTS[category], min(4, len(PRODUCTS[category])))
-                
-                for prod_data in category_products:
-                    product_id = f"PROD{product_counter:04d}"
-                    total_stock = random.randint(20, 100)
-                    online_stock = random.randint(int(total_stock * 0.5), total_stock)
-                    
-                    product = Product(
-                        product_id=product_id,
-                        seller_id=seller.user_id,
-                        name=prod_data['name'],
-                        description=prod_data['desc'],
-                        category=category,
-                        price=prod_data['price'] + random.randint(-50, 50),
-                        stock=total_stock,
-                        online_stock=online_stock,
-                        images=json.dumps([prod_data['img']]),
-                        is_visible=1,
-                        rating=0.0,
-                        rating_count=0
-                    )
-                    db.session.add(product)
-                    products.append(product)
-                    product_counter += 1
-                    
-                    if product_counter > num_products:
-                        break
-        
-        db.session.commit()
-        print(f"Created {len(products)} products")
-        
-        print("Creating reviews...")
+        print("Creating reviews for products...")
         review_count = 0
-        for product in products:
-            num_reviews = random.randint(2, 8)
+        for product in random.sample(products, min(500, len(products))):
+            num_reviews = random.randint(1, 6)
             reviewers = random.sample(buyers, min(num_reviews, len(buyers)))
             
             total_rating = 0
@@ -213,17 +301,21 @@ def seed_data():
             if num_reviews > 0:
                 product.rating = round(total_rating / num_reviews, 1)
                 product.rating_count = num_reviews
+            
+            if review_count % 100 == 0:
+                db.session.commit()
         
         db.session.commit()
         print(f"Created {review_count} reviews")
         
-        print("\n=== Sample Data Created Successfully! ===")
-        print(f"Sellers: {len(sellers)}")
-        print(f"Buyers: {len(buyers)}")
+        print("\n=== Seed Data Created Successfully! ===")
+        print(f"Sellers: {len(sellers)} (3 from Bareilly, UP)")
         print(f"Products: {len(products)}")
+        print(f"Buyers: {len(buyers)}")
         print(f"Reviews: {review_count}")
         print("\nTest Accounts:")
-        print("Seller: seller11@buddyshop.com / seller123")
+        print("Seller: seller1@buddyshop.com / seller123 (Bareilly)")
+        print("Seller: seller2@buddyshop.com / seller123 (Bareilly)")
         print("Buyer: buyer1@buddyshop.com / buyer123")
 
 if __name__ == '__main__':
