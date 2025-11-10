@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Seller Dashboard - FlipShop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <h1>Seller Dashboard</h1>
+        <a href="/seller/add-product" class="btn-primary">
+            <i class="fas fa-plus"></i> Add New Product
+        </a>
+    </div>
+    
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <i class="fas fa-box"></i>
+            <h3>{{ products|length }}</h3>
+            <p>Total Products</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>0</h3>
+            <p>Total Orders</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-rupee-sign"></i>
+            <h3>0</h3>
+            <p>Total Revenue</p>
+        </div>
+    </div>
+    
+    <h2>Your Products</h2>
+    
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <div class="product-image">
+                {% if product.images and product.images|length > 0 %}
+                    <img src="{{ product.images[0] }}" alt="{{ product.name }}">
+                {% else %}
+                    <img src="https://via.placeholder.com/300x300?text=No+Image" alt="{{ product.name }}">
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <h3>{{ product.name }}</h3>
+                <p class="product-description">{{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}</p>
+                <div class="product-price">₹{{ product.price }}</div>
+                <div class="product-stock">Stock: {{ product.stock }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if products|length == 0 %}
+    <div class="no-products">
+        <i class="fas fa-box-open"></i>
+        <p>You haven't added any products yet.</p>
+        <a href="/seller/add-product" class="btn-primary">Add Your First Product</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

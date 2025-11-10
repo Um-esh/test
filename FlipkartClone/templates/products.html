@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Products - FlipShop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="products-header">
+        <h1>Products</h1>
+        <div class="filters">
+            <select id="categoryFilter" onchange="filterProducts()">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card" onclick="location.href='/product/{{ product.product_id }}'">
+            <div class="product-image">
+                {% if product.images and product.images|length > 0 %}
+                    <img src="{{ product.images[0] }}" alt="{{ product.name }}">
+                {% else %}
+                    <img src="https://via.placeholder.com/300x300?text=No+Image" alt="{{ product.name }}">
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <h3>{{ product.name }}</h3>
+                <p class="product-description">{{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}</p>
+                <div class="product-price">₹{{ product.price }}</div>
+                <div class="product-category">{{ product.category }}</div>
+            </div>
+            <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('{{ product.product_id }}')">
+                <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if products|length == 0 %}
+    <div class="no-products">
+        <i class="fas fa-box-open"></i>
+        <p>No products found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function loadCategories() {
+    const response = await fetch('/api/categories');
+    const categories = await response.json();
+    
+    const select = document.getElementById('categoryFilter');
+    categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        select.appendChild(option);
+    });
+}
+
+function filterProducts() {
+    const category = document.getElementById('categoryFilter').value;
+    if (category) {
+        window.location.href = '/products?category=' + encodeURIComponent(category);
+    } else {
+        window.location.href = '/products';
+    }
+}
+
+async function addToCart(productId) {
+    try {
+        const response = await fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ product_id: productId, quantity: 1 })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+        } else {
+            if (response.status === 401) {
+                window.location.href = '/login';
+            } else {
+                showNotification(data.message, 'error');
+            }
+        }
+    } catch (error) {
+        showNotification('Failed to add to cart', 'error');
+    }
+}
+
+loadCategories();
+</script>
+{% endblock %}

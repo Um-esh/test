@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}FlipShop - Online Shopping for Electronics, Fashion & More{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>Welcome to FlipShop</h1>
+        <p>Discover millions of products at great prices</p>
+    </div>
+</div>
+
+<div class="categories-section">
+    <div class="container">
+        <h2>Shop by Category</h2>
+        <div class="categories-grid" id="categoriesGrid">
+            <div class="category-card" onclick="filterByCategory('Electronics')">
+                <i class="fas fa-laptop"></i>
+                <p>Electronics</p>
+            </div>
+            <div class="category-card" onclick="filterByCategory('Fashion')">
+                <i class="fas fa-tshirt"></i>
+                <p>Fashion</p>
+            </div>
+            <div class="category-card" onclick="filterByCategory('Home')">
+                <i class="fas fa-home"></i>
+                <p>Home & Furniture</p>
+            </div>
+            <div class="category-card" onclick="filterByCategory('Books')">
+                <i class="fas fa-book"></i>
+                <p>Books</p>
+            </div>
+            <div class="category-card" onclick="filterByCategory('Sports')">
+                <i class="fas fa-football-ball"></i>
+                <p>Sports</p>
+            </div>
+            <div class="category-card" onclick="filterByCategory('Toys')">
+                <i class="fas fa-gamepad"></i>
+                <p>Toys</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="products-section">
+    <div class="container">
+        <h2>Featured Products</h2>
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card" onclick="location.href='/product/{{ product.product_id }}'">
+                <div class="product-image">
+                    {% if product.images and product.images|length > 0 %}
+                        <img src="{{ product.images[0] }}" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/300x300?text=No+Image" alt="{{ product.name }}">
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3>{{ product.name }}</h3>
+                    <p class="product-description">{{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}</p>
+                    <div class="product-price">₹{{ product.price }}</div>
+                    <div class="product-category">{{ product.category }}</div>
+                </div>
+                <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('{{ product.product_id }}')">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if products|length == 0 %}
+        <div class="no-products">
+            <i class="fas fa-box-open"></i>
+            <p>No products available yet. Check back soon!</p>
+            {% if user and user.user_type == 'seller' %}
+            <a href="/seller/add-product" class="btn-primary">Add Your First Product</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function filterByCategory(category) {
+    window.location.href = '/products?category=' + encodeURIComponent(category);
+}
+
+function searchProducts() {
+    const searchTerm = document.getElementById('searchInput').value;
+    if (searchTerm) {
+        window.location.href = '/products?search=' + encodeURIComponent(searchTerm);
+    }
+}
+
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchProducts();
+    }
+});
+
+async function addToCart(productId) {
+    try {
+        const response = await fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ product_id: productId, quantity: 1 })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+        } else {
+            if (response.status === 401) {
+                window.location.href = '/login';
+            } else {
+                showNotification(data.message, 'error');
+            }
+        }
+    } catch (error) {
+        showNotification('Failed to add to cart', 'error');
+    }
+}
+</script>
+{% endblock %}

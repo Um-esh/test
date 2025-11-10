@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - FlipShop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Shopping Cart</h1>
+    
+    {% if cart_items|length > 0 %}
+    <div class="cart-container">
+        <div class="cart-items">
+            {% for item in cart_items %}
+            <div class="cart-item">
+                <div class="cart-item-image">
+                    {% if item.images %}
+                        {% set images_list = item.images %}
+                        {% if images_list|length > 0 %}
+                            <img src="{{ images_list[0] }}" alt="{{ item.name }}">
+                        {% endif %}
+                    {% else %}
+                        <img src="https://via.placeholder.com/100x100?text=No+Image" alt="{{ item.name }}">
+                    {% endif %}
+                </div>
+                
+                <div class="cart-item-details">
+                    <h3>{{ item.name }}</h3>
+                    <div class="cart-item-price">₹{{ item.price }}</div>
+                    <div class="cart-item-quantity">
+                        Quantity: {{ item.quantity }}
+                    </div>
+                </div>
+                
+                <div class="cart-item-total">
+                    ₹{{ item.price * item.quantity }}
+                </div>
+                
+                <button class="cart-item-remove" onclick="removeFromCart({{ item.id }})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="cart-summary">
+            <h2>Order Summary</h2>
+            
+            <div class="summary-row">
+                <span>Subtotal:</span>
+                <span>₹{{ cart_items|sum(attribute='price') }}</span>
+            </div>
+            
+            <div class="summary-row">
+                <span>Shipping:</span>
+                <span>₹50</span>
+            </div>
+            
+            <div class="summary-total">
+                <span>Total:</span>
+                <span>₹{{ cart_items|sum(attribute='price') + 50 }}</span>
+            </div>
+            
+            <a href="/checkout" class="btn-primary btn-large btn-block">
+                Proceed to Checkout
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-cart">
+        <i class="fas fa-shopping-cart"></i>
+        <h2>Your cart is empty</h2>
+        <p>Add some products to get started!</p>
+        <a href="/products" class="btn-primary">Continue Shopping</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function removeFromCart(cartId) {
+    if (!confirm('Remove this item from cart?')) return;
+    
+    try {
+        const response = await fetch(`/cart/remove/${cartId}`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('Failed to remove item', 'error');
+    }
+}
+</script>
+{% endblock %}
