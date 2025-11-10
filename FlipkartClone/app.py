@@ -81,6 +81,10 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 @app.route('/')
+def onboarding():
+    return render_template('onboarding.html')
+
+@app.route('/home')
 def index():
     user = get_current_user()
     mode = request.args.get('mode', 'global')
