@@ -1,4 +1,4 @@
-# FlipShop Setup Guide
+# BuddyShop Setup Guide
 
 This guide will walk you through setting up all the features of your e-commerce platform.
 
@@ -49,7 +49,7 @@ Enable real-time notifications for orders and updates.
 
 1. Go to [Firebase Console](https://console.firebase.google.com)
 2. Click "Add project"
-3. Name it (e.g., "flipshop-notifications")
+3. Name it (e.g., "buddyshop-notifications")
 4. Disable Google Analytics (not needed)
 5. Create project
 
@@ -65,7 +65,7 @@ Enable real-time notifications for orders and updates.
 1. In Project settings → General tab
 2. Scroll to "Your apps" section
 3. Click the web icon (`</>`) to add a web app
-4. Register app with a nickname (e.g., "flipshop-web")
+4. Register app with a nickname (e.g., "buddyshop-web")
 5. Copy the configuration values shown
 
 ### Step 4: Set Environment Variables

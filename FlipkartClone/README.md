@@ -1,6 +1,6 @@
-# FlipShop - E-Commerce Platform
+# BuddyShop - E-Commerce Platform
 
-A fully-featured e-commerce platform similar to Flipkart with Flask backend and responsive frontend.
+A fully-featured e-commerce platform similar to BuddyShop with Flask backend and responsive frontend.
 
 ## Features
 
@@ -27,7 +27,7 @@ A fully-featured e-commerce platform similar to Flipkart with Flask backend and 
 
 ✅ **Responsive Design**
 - Mobile-friendly interface
-- Clean, modern UI inspired by Flipkart
+- Clean, modern UI inspired by BuddyShop
 - Smooth animations and transitions
 
 ## Quick Start
@@ -83,7 +83,7 @@ A fully-featured e-commerce platform similar to Flipkart with Flask backend and 
 - **Email**: Flask-Mail with SMTP
 - **Maps**: Leaflet.js + OpenStreetMap
 - **Notifications**: Firebase Cloud Messaging
-- **Styling**: Custom CSS (Flipkart-inspired)
+- **Styling**: Custom CSS (BuddyShop-inspired)
 
 ## Configuration
 

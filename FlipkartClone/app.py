@@ -9,7 +9,7 @@ from datetime import datetime
 import math
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from models import db, User, Product, Cart, Order, Address, TempUser, AuthToken
+from models import db, User, Product, Cart, Order, Address, TempUser, AuthToken, Review, RoutePlan, RoutePlanStop
 from database import init_db, cleanup_expired_temp_users
 from auth import create_temp_user, verify_and_move_user, create_auth_token, verify_token, logout_user, create_logout_token, verify_logout_token
 
@@ -20,12 +20,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'srms.inventory@gmail.com'
-app.config['MAIL_PASSWORD'] = 'ilslkasxuyqcqnke'
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME', 'noreply@ecommerce.com')
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'srms.inventory@gmail.com')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@buddyshop.com')
 
 db.init_app(app)
 mail = Mail(app)

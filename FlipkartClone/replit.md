@@ -1,13 +1,13 @@
-# FlipShop E-Commerce Platform
+# BuddyShop E-Commerce Platform
 
 ## Project Overview
-A comprehensive e-commerce platform similar to Flipkart, built with Flask backend and modern HTML/CSS/JavaScript frontend. Features include custom token-based authentication, seller product management, shopping cart, order processing, and integrated mapping for delivery addresses.
+A comprehensive e-commerce platform similar to BuddyShop, built with Flask backend and modern HTML/CSS/JavaScript frontend. Features include custom token-based authentication, seller product management, shopping cart, order processing, and integrated mapping for delivery addresses.
 
 ## Recent Changes
 - **Date: November 9, 2024**
   - Initial project setup with complete e-commerce functionality
   - Implemented custom authentication system with email verification
-  - Created responsive UI inspired by Flipkart
+  - Created responsive UI inspired by BuddyShop
   - Integrated OpenStreetMap with Leaflet.js for address selection
   - Set up Firebase Cloud Messaging for push notifications
 
