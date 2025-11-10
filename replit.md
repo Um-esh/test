@@ -1,8 +1,19 @@
-# FlipShop E-Commerce Platform
+# Buddy-Shop E-Commerce Platform
 
 ## Overview
 
-FlipShop is a comprehensive e-commerce platform inspired by Flipkart, built with Flask backend and vanilla JavaScript frontend. The platform supports both global e-commerce and local marketplace modes, allowing users to shop from anywhere or discover nearby sellers within a 30km radius. It features a custom token-based authentication system, seller product management, shopping cart functionality, order processing, and integrated map-based address selection.
+Buddy-Shop is a comprehensive e-commerce platform with a professional cold-war inspired 3D design aesthetic, built with Flask backend and vanilla JavaScript frontend. The platform supports both global e-commerce and local marketplace modes, allowing users to shop from anywhere or discover nearby sellers within a 30km radius. It features a custom token-based authentication system, seller product management, shopping cart functionality, order processing, and integrated map-based address selection.
+
+## Recent Updates (November 2025)
+
+**Complete Design Overhaul - Cold War Professional Theme**
+- Implemented military-inspired color palette: olive greens (#556B2F), burgundy (#6B2C2C), tan/beige (#D4C5B0), and metallic grays
+- Added comprehensive 3D depth effects throughout the UI using multi-layer box shadows and gradients
+- Created stunning onboarding screen with animated logo, military badges, and fade-out transition
+- Rebranded entire application from "FlipShop" to "Buddy-Shop" with new logo integration
+- Updated all UI components (navbar, buttons, cards, forms) with raised/embossed 3D styling
+- Implemented 3D utility classes: .elevated, .inset, .glossy, .metallic for consistent depth application
+- All gradients and shadows follow the cold-war professional aesthetic with proper depth perception
 
 ## User Preferences
 
