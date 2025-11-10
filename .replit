@@ -1,7 +1,8 @@
-modules = ["python-3.11"]
+modules = ["web", "python-3.11", "nodejs-20"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["openssl", "postgresql"]
 
 [agent]
 expertMode = true
@@ -16,15 +17,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "flask-app"
+args = "Start application"
 
 [[workflows.workflow]]
-name = "flask-app"
+name = "Start application"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd FlipkartClone && python app.py"
+args = "cd FlipkartClone && uv run python app.py"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
@@ -35,5 +36,9 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 41805
+localPort = 45405
 externalPort = 3000
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
