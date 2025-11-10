@@ -117,6 +117,14 @@ def index():
     
     products_data = []
     for product in products:
+        if product.images:
+            try:
+                images = json.loads(product.images) if product.images.startswith('[') else [product.images]
+            except (json.JSONDecodeError, AttributeError):
+                images = [product.images] if product.images else []
+        else:
+            images = []
+        
         product_dict = {
             'id': product.id,
             'product_id': product.product_id,
@@ -125,7 +133,7 @@ def index():
             'category': product.category,
             'price': product.price,
             'stock': product.stock,
-            'images': json.loads(product.images) if product.images else [],
+            'images': images,
             'distance': product.distance if hasattr(product, 'distance') else None,
             'seller_shop_name': product.seller_shop_name if hasattr(product, 'seller_shop_name') else None
         }
