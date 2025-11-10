@@ -1,100 +1,299 @@
 {% extends "base.html" %}
 
-{% block title %}FlipShop - Online Shopping for Electronics, Fashion & More{% endblock %}
+{% block title %}Local Trade - Shop Local or Global{% endblock %}
 
 {% block content %}
+<div class="mode-toggle-container">
+    <div class="mode-toggle">
+        <button class="toggle-option {% if mode == 'global' %}active{% endif %}" onclick="switchMode('global')">
+            <i class="fas fa-globe"></i>
+            <span>E-COMMERCE</span>
+        </button>
+        <div class="toggle-switch">
+            <div class="toggle-slider {% if mode == 'local' %}local{% endif %}"></div>
+        </div>
+        <button class="toggle-option {% if mode == 'local' %}active{% endif %}" onclick="switchMode('local')">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>LOCAL</span>
+        </button>
+    </div>
+    {% if mode == 'local' %}
+    <p class="mode-description">Showing shops within 30km radius</p>
+    {% else %}
+    <p class="mode-description">Showing all products globally</p>
+    {% endif %}
+</div>
+
 <div class="hero-section">
     <div class="hero-content">
-        <h1>Welcome to FlipShop</h1>
-        <p>Discover millions of products at great prices</p>
+        <h1 class="animated-title">{% if mode == 'local' %}LOCAL TRADE{% else %}Welcome to FlipShop{% endif %}</h1>
+        <p class="animated-subtitle">{% if mode == 'local' %}Support local businesses in your area{% else %}Discover millions of products at great prices{% endif %}</p>
     </div>
 </div>
 
-<div class="categories-section">
-    <div class="container">
-        <h2>Shop by Category</h2>
-        <div class="categories-grid" id="categoriesGrid">
-            <div class="category-card" onclick="filterByCategory('Electronics')">
-                <i class="fas fa-laptop"></i>
-                <p>Electronics</p>
+<div class="main-container">
+    {% if mode == 'local' %}
+    <div class="local-layout">
+        <div class="products-section">
+            <div class="container">
+                <div class="mega-sale-banner">
+                    <div class="sale-content">
+                        <h2>MEGA SALE:</h2>
+                        <h3>UP TO 70% OFF!</h3>
+                        <div class="product-showcase">
+                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop" alt="Product">
+                            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop" alt="Product">
+                            <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=200&h=200&fit=crop" alt="Product">
+                        </div>
+                    </div>
+                    <div class="flipkart-mode">
+                        <i class="fas fa-shopping-cart"></i> Flipkart Mode
+                    </div>
+                </div>
+
+                <h2>Nearby Products</h2>
+                <div class="products-grid">
+                    {% for product in products %}
+                    <div class="product-card" onclick="location.href='/product/{{ product.product_id }}'">
+                        <div class="product-image">
+                            {% if product.images and product.images|length > 0 %}
+                                <img src="{{ product.images[0] }}" alt="{{ product.name }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/300x300?text=No+Image" alt="{{ product.name }}">
+                            {% endif %}
+                            {% if product.distance %}
+                            <div class="distance-badge">{{ product.distance }} km</div>
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <h3>{{ product.name }}</h3>
+                            <div class="rating">★★★★☆</div>
+                            {% if product.seller_shop_name %}
+                            <p class="shop-name"><i class="fas fa-store"></i> {{ product.seller_shop_name }}</p>
+                            {% endif %}
+                            <div class="product-price">₹{{ product.price }}</div>
+                        </div>
+                        <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('{{ product.product_id }}')">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="category-card" onclick="filterByCategory('Fashion')">
-                <i class="fas fa-tshirt"></i>
-                <p>Fashion</p>
-            </div>
-            <div class="category-card" onclick="filterByCategory('Home')">
-                <i class="fas fa-home"></i>
-                <p>Home & Furniture</p>
-            </div>
-            <div class="category-card" onclick="filterByCategory('Books')">
-                <i class="fas fa-book"></i>
-                <p>Books</p>
-            </div>
-            <div class="category-card" onclick="filterByCategory('Sports')">
-                <i class="fas fa-football-ball"></i>
-                <p>Sports</p>
-            </div>
-            <div class="category-card" onclick="filterByCategory('Toys')">
-                <i class="fas fa-gamepad"></i>
-                <p>Toys</p>
+        </div>
+
+        <div class="map-sidebar">
+            <div class="map-widget">
+                <div class="map-header">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Check Availability in Nearby Stores</h3>
+                </div>
+                <div id="map" class="map-container"></div>
+                <div class="nearby-shops-list">
+                    <h4>Nearby Shops</h4>
+                    <div id="shopsList"></div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<div class="products-section">
-    <div class="container">
-        <h2>Featured Products</h2>
-        <div class="products-grid">
-            {% for product in products %}
-            <div class="product-card" onclick="location.href='/product/{{ product.product_id }}'">
-                <div class="product-image">
-                    {% if product.images and product.images|length > 0 %}
-                        <img src="{{ product.images[0] }}" alt="{{ product.name }}">
-                    {% else %}
-                        <img src="https://via.placeholder.com/300x300?text=No+Image" alt="{{ product.name }}">
-                    {% endif %}
+    {% else %}
+    <div class="categories-section">
+        <div class="container">
+            <h2>Shop by Category</h2>
+            <div class="categories-grid" id="categoriesGrid">
+                <div class="category-card" onclick="filterByCategory('Electronics')">
+                    <i class="fas fa-laptop"></i>
+                    <p>Electronics</p>
                 </div>
-                <div class="product-info">
-                    <h3>{{ product.name }}</h3>
-                    <p class="product-description">{{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}</p>
-                    <div class="product-price">₹{{ product.price }}</div>
-                    <div class="product-category">{{ product.category }}</div>
+                <div class="category-card" onclick="filterByCategory('Fashion')">
+                    <i class="fas fa-tshirt"></i>
+                    <p>Fashion</p>
                 </div>
-                <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('{{ product.product_id }}')">
-                    <i class="fas fa-cart-plus"></i> Add to Cart
-                </button>
+                <div class="category-card" onclick="filterByCategory('Home')">
+                    <i class="fas fa-home"></i>
+                    <p>Home & Furniture</p>
+                </div>
+                <div class="category-card" onclick="filterByCategory('Books')">
+                    <i class="fas fa-book"></i>
+                    <p>Books</p>
+                </div>
+                <div class="category-card" onclick="filterByCategory('Sports')">
+                    <i class="fas fa-football-ball"></i>
+                    <p>Sports</p>
+                </div>
+                <div class="category-card" onclick="filterByCategory('Toys')">
+                    <i class="fas fa-gamepad"></i>
+                    <p>Toys</p>
+                </div>
             </div>
-            {% endfor %}
         </div>
-        
-        {% if products|length == 0 %}
-        <div class="no-products">
-            <i class="fas fa-box-open"></i>
-            <p>No products available yet. Check back soon!</p>
-            {% if user and user.user_type == 'seller' %}
-            <a href="/seller/add-product" class="btn-primary">Add Your First Product</a>
+    </div>
+
+    <div class="products-section">
+        <div class="container">
+            <h2>Featured Products</h2>
+            <div class="products-grid">
+                {% for product in products %}
+                <div class="product-card" onclick="location.href='/product/{{ product.product_id }}'">
+                    <div class="product-image">
+                        {% if product.images and product.images|length > 0 %}
+                            <img src="{{ product.images[0] }}" alt="{{ product.name }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/300x300?text=No+Image" alt="{{ product.name }}">
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        <h3>{{ product.name }}</h3>
+                        <p class="product-description">{{ product.description[:60] }}{% if product.description|length > 60 %}...{% endif %}</p>
+                        <div class="product-price">₹{{ product.price }}</div>
+                        <div class="product-category">{{ product.category }}</div>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart('{{ product.product_id }}')">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if products|length == 0 %}
+            <div class="no-products">
+                <i class="fas fa-box-open"></i>
+                <p>No products available yet. Check back soon!</p>
+                {% if user and user.user_type == 'seller' %}
+                <a href="/seller/add-product" class="btn-primary">Add Your First Product</a>
+                {% endif %}
+            </div>
             {% endif %}
         </div>
-        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="switch-mode-banner" {% if mode == 'local' %}style="display:none"{% endif %}>
+    <div class="banner-content">
+        <p>Want it faster? Switch to LOCAL mode!</p>
+        <button onclick="switchMode('local')" class="switch-btn">
+            <i class="fas fa-arrow-right"></i>
+        </button>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
+let userLat = null;
+let userLng = null;
+let map = null;
+
+if (navigator.geolocation && '{{ mode }}' === 'local') {
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            userLat = position.coords.latitude;
+            userLng = position.coords.longitude;
+            initMap();
+            loadNearbyShops();
+            window.location.href = `/?mode=local&lat=${userLat}&lng=${userLng}`;
+        },
+        function(error) {
+            console.log('Geolocation error:', error);
+            showNotification('Please enable location access to use local mode', 'warning');
+        }
+    );
+}
+
+function initMap() {
+    if (!userLat || !userLng) return;
+    
+    map = L.map('map').setView([userLat, userLng], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    L.marker([userLat, userLng]).addTo(map)
+        .bindPopup('Your Location')
+        .openPopup();
+}
+
+async function loadNearbyShops() {
+    if (!userLat || !userLng) return;
+    
+    try {
+        const response = await fetch(`/api/nearby-shops?lat=${userLat}&lng=${userLng}`);
+        const shops = await response.json();
+        
+        const shopsList = document.getElementById('shopsList');
+        if (shopsList) {
+            shopsList.innerHTML = '';
+            
+            shops.forEach(shop => {
+                const shopDiv = document.createElement('div');
+                shopDiv.className = 'shop-item';
+                shopDiv.innerHTML = `
+                    <div class="shop-name">${shop.shop_name || 'Unnamed Shop'}</div>
+                    <div class="shop-distance">${shop.distance} km</div>
+                    <div class="shop-address">${shop.shop_address || shop.city || ''}</div>
+                `;
+                shopsList.appendChild(shopDiv);
+                
+                if (map && shop.latitude && shop.longitude) {
+                    L.marker([shop.latitude, shop.longitude]).addTo(map)
+                        .bindPopup(`<b>${shop.shop_name}</b><br>${shop.distance} km away`);
+                }
+            });
+            
+            if (shops.length === 0) {
+                shopsList.innerHTML = '<p class="no-shops">No shops found within 30km</p>';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading nearby shops:', error);
+    }
+}
+
+function switchMode(mode) {
+    if (mode === 'local') {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    window.location.href = `/?mode=local&lat=${lat}&lng=${lng}`;
+                },
+                function(error) {
+                    showNotification('Please enable location access to use local mode', 'warning');
+                }
+            );
+        } else {
+            showNotification('Geolocation is not supported by your browser', 'error');
+        }
+    } else {
+        window.location.href = '/?mode=global';
+    }
+}
+
 function filterByCategory(category) {
-    window.location.href = '/products?category=' + encodeURIComponent(category);
+    const mode = '{{ mode }}';
+    let url = '/products?category=' + encodeURIComponent(category) + '&mode=' + mode;
+    if (mode === 'local' && userLat && userLng) {
+        url += `&lat=${userLat}&lng=${userLng}`;
+    }
+    window.location.href = url;
 }
 
 function searchProducts() {
     const searchTerm = document.getElementById('searchInput').value;
+    const mode = '{{ mode }}';
     if (searchTerm) {
-        window.location.href = '/products?search=' + encodeURIComponent(searchTerm);
+        let url = '/products?search=' + encodeURIComponent(searchTerm) + '&mode=' + mode;
+        if (mode === 'local' && userLat && userLng) {
+            url += `&lat=${userLat}&lng=${userLng}`;
+        }
+        window.location.href = url;
     }
 }
 
-document.getElementById('searchInput').addEventListener('keypress', function(e) {
+document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         searchProducts();
     }

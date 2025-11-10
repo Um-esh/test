@@ -1,11 +1,10 @@
 import secrets
 import hashlib
-import sqlite3
 from datetime import datetime, timedelta
-from database import get_db_connection
+from models import db, User, TempUser, AuthToken, LogoutToken
 
 def generate_user_id(email):
-    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
     hash_obj = hashlib.md5(email.encode())
     return f"USER_{timestamp}_{hash_obj.hexdigest()[:8]}"
 
@@ -17,123 +16,125 @@ def generate_auth_token(user_id, login_time):
 
 def create_temp_user(email, password_hash, full_name, phone, user_type):
     user_id = generate_user_id(email)
-    expires_at = datetime.now() + timedelta(minutes=15)
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    expires_at = datetime.utcnow() + timedelta(minutes=15)
     
     try:
-        cursor.execute('''
-            INSERT INTO temp_users (user_id, email, password_hash, full_name, phone, user_type, expires_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (user_id, email, password_hash, full_name, phone, user_type, expires_at))
-        conn.commit()
+        temp_user = TempUser(
+            user_id=user_id,
+            email=email,
+            password_hash=password_hash,
+            full_name=full_name,
+            phone=phone,
+            user_type=user_type,
+            expires_at=expires_at
+        )
+        db.session.add(temp_user)
+        db.session.commit()
         return user_id
-    except sqlite3.IntegrityError:
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating temp user: {e}")
         return None
-    finally:
-        conn.close()
 
 def verify_and_move_user(user_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute('SELECT * FROM temp_users WHERE user_id = ? AND expires_at > ?', 
-                   (user_id, datetime.now()))
-    temp_user = cursor.fetchone()
-    
-    if temp_user:
-        cursor.execute('''
-            INSERT INTO users (user_id, email, password_hash, full_name, phone, user_type)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (temp_user['user_id'], temp_user['email'], temp_user['password_hash'],
-              temp_user['full_name'], temp_user['phone'], temp_user['user_type']))
+    try:
+        temp_user = TempUser.query.filter_by(user_id=user_id).filter(
+            TempUser.expires_at > datetime.utcnow()
+        ).first()
         
-        cursor.execute('DELETE FROM temp_users WHERE user_id = ?', (user_id,))
-        conn.commit()
-        conn.close()
-        return True
-    
-    conn.close()
-    return False
+        if temp_user:
+            new_user = User(
+                user_id=temp_user.user_id,
+                email=temp_user.email,
+                password_hash=temp_user.password_hash,
+                full_name=temp_user.full_name,
+                phone=temp_user.phone,
+                user_type=temp_user.user_type
+            )
+            db.session.add(new_user)
+            db.session.delete(temp_user)
+            db.session.commit()
+            return True
+        
+        return False
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error verifying user: {e}")
+        return False
 
 def create_auth_token(user_id):
-    login_time = datetime.now()
+    login_time = datetime.utcnow()
     token = generate_auth_token(user_id, login_time)
     
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        INSERT INTO auth_tokens (user_id, token, login_time)
-        VALUES (?, ?, ?)
-    ''', (user_id, token, login_time))
-    
-    cursor.execute('UPDATE users SET login_status = 1 WHERE user_id = ?', (user_id,))
-    
-    conn.commit()
-    conn.close()
-    
-    return token
+    try:
+        auth_token = AuthToken(
+            user_id=user_id,
+            token=token,
+            login_time=login_time
+        )
+        db.session.add(auth_token)
+        
+        user = User.query.filter_by(user_id=user_id).first()
+        if user:
+            user.login_status = 1
+        
+        db.session.commit()
+        return token
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating auth token: {e}")
+        return None
 
 def verify_token(token):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        SELECT user_id FROM auth_tokens 
-        WHERE token = ? AND is_active = 1
-    ''', (token,))
-    
-    result = cursor.fetchone()
-    conn.close()
-    
-    return result['user_id'] if result else None
+    try:
+        auth_token = AuthToken.query.filter_by(token=token, is_active=1).first()
+        return auth_token.user_id if auth_token else None
+    except Exception as e:
+        print(f"Error verifying token: {e}")
+        return None
 
 def create_logout_token(user_id):
     token = secrets.token_urlsafe(32)
-    expires_at = datetime.now() + timedelta(minutes=15)
+    expires_at = datetime.utcnow() + timedelta(minutes=15)
     
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        INSERT INTO logout_tokens (user_id, token, expires_at)
-        VALUES (?, ?, ?)
-    ''', (user_id, token, expires_at))
-    
-    conn.commit()
-    conn.close()
-    
-    return token
+    try:
+        logout_token = LogoutToken(
+            user_id=user_id,
+            token=token,
+            expires_at=expires_at
+        )
+        db.session.add(logout_token)
+        db.session.commit()
+        return token
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating logout token: {e}")
+        return None
 
 def verify_logout_token(token):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        SELECT user_id FROM logout_tokens 
-        WHERE token = ? AND expires_at > ? AND used = 0
-    ''', (token, datetime.now()))
-    
-    result = cursor.fetchone()
-    
-    if result:
-        cursor.execute('UPDATE logout_tokens SET used = 1 WHERE token = ?', (token,))
-        conn.commit()
-        user_id = result['user_id']
-        conn.close()
-        return user_id
-    
-    conn.close()
-    return None
+    try:
+        logout_token = LogoutToken.query.filter_by(token=token, used=0).filter(
+            LogoutToken.expires_at > datetime.utcnow()
+        ).first()
+        
+        if logout_token:
+            logout_token.used = 1
+            db.session.commit()
+            return logout_token.user_id
+        
+        return None
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error verifying logout token: {e}")
+        return None
 
 def logout_user(user_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute('UPDATE auth_tokens SET is_active = 0 WHERE user_id = ?', (user_id,))
-    cursor.execute('UPDATE users SET login_status = 0 WHERE user_id = ?', (user_id,))
-    
-    conn.commit()
-    conn.close()
+    try:
+        AuthToken.query.filter_by(user_id=user_id).update({'is_active': 0})
+        user = User.query.filter_by(user_id=user_id).first()
+        if user:
+            user.login_status = 0
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error logging out user: {e}")
