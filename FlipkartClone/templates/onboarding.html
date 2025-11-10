@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Buddy-Shop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .onboarding-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #3d4f3f 0%, #5a4a42 50%, #4a3f3a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .onboarding-screen.fade-out {
+            animation: fadeOut 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        .logo-container {
+            position: relative;
+            animation: float 3s ease-in-out infinite, scaleIn 0.8s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotateX(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotateX(5deg);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0) rotateY(180deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotateY(0deg);
+                opacity: 1;
+            }
+        }
+
+        .logo-wrapper {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transform-style: preserve-3d;
+        }
+
+        .logo-image {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+        }
+
+        .brand-name {
+            font-size: 48px;
+            font-weight: bold;
+            color: #d4c5b0;
+            text-align: center;
+            margin-top: 30px;
+            letter-spacing: 3px;
+            text-shadow: 
+                0 2px 0 rgba(0, 0, 0, 0.3),
+                0 5px 15px rgba(0, 0, 0, 0.5),
+                0 -1px 0 rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.8s ease-out 0.3s both;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px) translateZ(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) translateZ(0);
+                opacity: 1;
+            }
+        }
+
+        .tagline {
+            font-size: 18px;
+            color: #9fa89f;
+            text-align: center;
+            margin-top: 15px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: slideUp 0.8s ease-out 0.6s both;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .loading-container {
+            margin-top: 50px;
+            animation: slideUp 0.8s ease-out 0.9s both;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 1px 2px rgba(0, 0, 0, 0.5),
+                0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #8b7355 0%, #d4c5b0 50%, #8b7355 100%);
+            background-size: 200% 100%;
+            animation: loading 2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(212, 197, 176, 0.5);
+        }
+
+        @keyframes loading {
+            0% {
+                width: 0%;
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                width: 100%;
+                background-position: 0% 50%;
+            }
+        }
+
+        .military-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #8b7355 0%, #5a4a42 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #d4c5b0;
+            font-weight: bold;
+            text-align: center;
+            border: 3px solid rgba(212, 197, 176, 0.3);
+            box-shadow: 
+                0 5px 15px rgba(0, 0, 0, 0.5),
+                inset 0 2px 5px rgba(255, 255, 255, 0.1);
+            animation: rotate360 20s linear infinite;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes rotate360 {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .stars {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 14px;
+            color: #8b7355;
+            letter-spacing: 2px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="onboarding-screen" id="onboardingScreen">
+        <div class="stars">★ ★ ★</div>
+        <div class="military-badge">
+            SECURE<br>TRADE
+        </div>
+        
+        <div class="logo-container">
+            <div class="logo-wrapper">
+                <img src="/static/img/buddyshop-logo.png" alt="Buddy-Shop Logo" class="logo-image">
+            </div>
+        </div>
+        
+        <h1 class="brand-name">BUDDY-SHOP</h1>
+        <p class="tagline">Your Trusted Trade Partner</p>
+        
+        <div class="loading-container">
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(function() {
+            const onboardingScreen = document.getElementById('onboardingScreen');
+            onboardingScreen.classList.add('fade-out');
+            
+            setTimeout(function() {
+                window.location.href = '/home';
+            }, 800);
+        }, 3000);
+    </script>
+</body>
+</html>
