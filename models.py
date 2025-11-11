@@ -42,6 +42,8 @@ class User(db.Model):
     auth_tokens = db.relationship('AuthToken', backref='user', lazy=True, cascade='all, delete-orphan')
     products = db.relationship('Product', backref='seller', lazy=True, cascade='all, delete-orphan')
     cart_items = db.relationship('Cart', backref='user', lazy=True, cascade='all, delete-orphan')
+    pickup_items = db.relationship('PickupItem', foreign_keys='PickupItem.user_id', backref='buyer', lazy=True, cascade='all, delete-orphan')
+    pickup_seller_items = db.relationship('PickupItem', foreign_keys='PickupItem.seller_id', backref='seller_pickup', lazy=True)
     orders = db.relationship('Order', foreign_keys='Order.user_id', backref='user', lazy=True, cascade='all, delete-orphan')
     seller_orders = db.relationship('Order', foreign_keys='Order.seller_id', backref='seller', lazy=True)
     addresses = db.relationship('Address', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -85,6 +87,21 @@ class Cart(db.Model):
     user_id = db.Column(String(100), db.ForeignKey('users.user_id'), nullable=False)
     product_id = db.Column(String(100), db.ForeignKey('products.product_id'), nullable=False)
     quantity = db.Column(Integer, default=1)
+    purchase_option = db.Column(String(20), default='delivery')
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PickupItem(db.Model):
+    __tablename__ = 'pickup_items'
+    
+    id = db.Column(Integer, primary_key=True)
+    user_id = db.Column(String(100), db.ForeignKey('users.user_id'), nullable=False)
+    product_id = db.Column(String(100), db.ForeignKey('products.product_id'), nullable=False)
+    seller_id = db.Column(String(100), db.ForeignKey('users.user_id'), nullable=False)
+    quantity = db.Column(Integer, default=1)
+    shop_lat = db.Column(Float, nullable=False)
+    shop_lng = db.Column(Float, nullable=False)
+    shop_name = db.Column(String(200))
+    shop_address = db.Column(Text)
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Order(db.Model):

@@ -1,159 +1,176 @@
-# Buddy-Shop E-Commerce Platform
+# BuddyShop E-Commerce Platform
 
-## Overview
+## Project Overview
+A comprehensive e-commerce platform similar to BuddyShop, built with Flask backend and modern HTML/CSS/JavaScript frontend. Features include custom token-based authentication, seller product management, shopping cart, order processing, and integrated mapping for delivery addresses.
 
-Buddy-Shop is a comprehensive e-commerce platform with a professional cold-war inspired 3D design aesthetic, built with Flask backend and vanilla JavaScript frontend. The platform supports both global e-commerce and local marketplace modes, allowing users to shop from anywhere or discover nearby sellers within a 30km radius. It features a custom token-based authentication system, seller product management, shopping cart functionality, order processing, and integrated map-based address selection.
+## Recent Changes
+- **Date: November 9, 2024**
+  - Initial project setup with complete e-commerce functionality
+  - Implemented custom authentication system with email verification
+  - Created responsive UI inspired by BuddyShop
+  - Integrated OpenStreetMap with Leaflet.js for address selection
+  - Set up Firebase Cloud Messaging for push notifications
 
-## Recent Updates (November 2025)
+## Technology Stack
 
-**Complete Design Overhaul - Cold War Professional Theme**
-- Implemented military-inspired color palette: olive greens (#556B2F), burgundy (#6B2C2C), tan/beige (#D4C5B0), and metallic grays
-- Added comprehensive 3D depth effects throughout the UI using multi-layer box shadows and gradients
-- Created stunning onboarding screen with animated logo, military badges, and fade-out transition
-- Rebranded entire application from "FlipShop" to "Buddy-Shop" with new logo integration
-- Updated all UI components (navbar, buttons, cards, forms) with raised/embossed 3D styling
-- Implemented 3D utility classes: .elevated, .inset, .glossy, .metallic for consistent depth application
-- All gradients and shadows follow the cold-war professional aesthetic with proper depth perception
+### Backend
+- **Flask**: Web framework for Python
+- **SQLite**: Database for users, products, orders, and cart
+- **Flask-Mail**: Email verification and logout confirmation
+- **APScheduler**: Background task scheduling for temp user cleanup
+- **Werkzeug**: Password hashing and security
+- **Pillow**: Image processing for product uploads
 
-## User Preferences
+### Frontend
+- **HTML5/CSS3**: Structure and styling
+- **JavaScript (Vanilla)**: Interactive functionality
+- **Leaflet.js**: OpenStreetMap integration for delivery addresses
+- **Firebase SDK**: Push notifications
+- **Font Awesome**: Icons
 
-Preferred communication style: Simple, everyday language.
+## Project Architecture
 
-## System Architecture
+### Database Structure
+- **temp_users**: Temporary user storage with 15-minute expiry for email verification
+- **users**: Main user table with login status tracking
+- **auth_tokens**: Authentication tokens with user ID and login timestamp
+- **products**: Product catalog with seller information
+- **cart**: Shopping cart items
+- **orders**: Order history with delivery information
+- **addresses**: Saved delivery addresses with coordinates
 
-### Backend Architecture
+### Authentication System
+1. **Registration**: User data saved to temp database, verification email sent
+2. **Email Verification**: 15-minute window to click link and move to main database
+3. **Login**: Generates unique token based on user ID + login timestamp
+4. **Session**: Token stored in httpOnly cookie for security
+5. **Logout**: Email confirmation required, sets login_status to false
 
-**Framework & Core Technologies**
-- **Flask**: Python web framework serving as the application backbone
-- **SQLAlchemy ORM**: Database abstraction layer for data management
-- **SQLite**: Lightweight embedded database for data persistence
-- **Werkzeug**: Security utilities for password hashing and file uploads
+### Key Features
+1. **User Management**: Registration with email verification, token-based auth
+2. **Seller Dashboard**: Add/manage products with image uploads
+3. **Product Catalog**: Browse, search, filter by category
+4. **Shopping Cart**: Add/remove items, quantity management
+5. **Checkout**: Interactive map for address selection using OSM/Leaflet
+6. **Order Tracking**: View order history with delivery status
+7. **Notifications**: Firebase Cloud Messaging for real-time updates
 
-**Custom Authentication System**
-The application implements a multi-stage authentication flow:
-1. **Registration Flow**: User data is temporarily stored in a `temp_users` table with 15-minute expiry
-2. **Email Verification**: Users receive verification emails and must confirm within the time window
-3. **User Migration**: Upon verification, data moves from temporary to permanent `users` table
-4. **Token Generation**: Login creates unique tokens combining user ID, timestamp, and random data hashed with SHA-256
-5. **Session Management**: Tokens stored in HTTP-only cookies for security
-6. **Forced Logout**: Email confirmation required for logout, setting `login_status` flag to false
+## File Structure
+```
+.
+├── app.py                  # Main Flask application
+├── database.py            # Database models and initialization
+├── auth.py                # Authentication utilities
+├── templates/             # HTML templates
+│   ├── base.html         # Base template with navigation
+│   ├── index.html        # Homepage
+│   ├── login.html        # Login page
+│   ├── register.html     # Registration page
+│   ├── verified.html     # Email verification result
+│   ├── products.html     # Product listing
+│   ├── product_detail.html
+│   ├── seller_dashboard.html
+│   ├── add_product.html
+│   ├── cart.html
+│   ├── checkout.html
+│   └── orders.html
+├── static/
+│   ├── css/style.css     # Main stylesheet
+│   ├── js/main.js        # JavaScript functionality
+│   ├── firebase-messaging-sw.js
+│   └── uploads/          # Product images
+└── ecommerce.db          # SQLite database
+```
 
-**Rationale**: This custom system provides granular control over user lifecycle, prevents spam registrations through email verification, and adds extra security through email-confirmed logout. Alternative considered was using Flask-Login, but custom solution offers more flexibility for multi-device session management.
+## Environment Variables
 
-**Background Task Scheduler**
-- **APScheduler**: Runs cleanup jobs every 5 minutes to remove expired temporary users and logout tokens
-- Prevents database bloat from abandoned registrations
+### Required for Email Functionality
+- `SESSION_SECRET`: Flask session secret (auto-generated if not set)
+- `MAIL_USERNAME`: SMTP email username
+- `MAIL_PASSWORD`: SMTP email password
 
-### Frontend Architecture
+### Optional for Firebase Push Notifications
+- `FIREBASE_API_KEY`: Firebase API key
+- `FIREBASE_AUTH_DOMAIN`: Firebase auth domain
+- `FIREBASE_PROJECT_ID`: Firebase project ID
+- `FIREBASE_STORAGE_BUCKET`: Firebase storage bucket
+- `FIREBASE_MESSAGING_SENDER_ID`: Firebase messaging sender ID
+- `FIREBASE_APP_ID`: Firebase app ID
+- `FIREBASE_VAPID_KEY`: Firebase VAPID key for web push
 
-**Technology Stack**
-- Pure HTML5/CSS3/JavaScript (no frontend framework)
-- Leaflet.js for interactive maps with OpenStreetMap integration
-- Firebase SDK for push notifications
-- Font Awesome for iconography
+If not configured, the app gracefully handles missing Firebase config.
 
-**Rationale**: Vanilla JavaScript chosen for simplicity and performance. No build step required, faster initial load times, and easier deployment. Considered React/Vue but deemed unnecessary for the scope.
+## Setup Instructions
 
-**Key Frontend Features**
-1. **Dual Mode System**: Toggle between global e-commerce and local marketplace (30km radius)
-2. **Interactive Address Selection**: Click-to-select on map with reverse geocoding
-3. **Real-time Cart Management**: Asynchronous cart updates without page reload
-4. **Responsive Design**: Mobile-first approach with flexible grid layouts
+### 1. Email Configuration
+To enable email verification and logout confirmation:
+1. Set up a Gmail account or SMTP server
+2. Add environment variables:
+   - `MAIL_USERNAME`: Your email address
+   - `MAIL_PASSWORD`: App password (for Gmail, create app-specific password)
 
-### Database Schema Design
+### 2. Firebase Setup (Optional)
+For push notifications:
+1. Create a Firebase project at https://console.firebase.google.com
+2. Enable Cloud Messaging
+3. Get your config from Project Settings
+4. Update Firebase config in:
+   - `static/js/main.js`
+   - `static/firebase-messaging-sw.js`
+5. Generate VAPID key from Cloud Messaging settings
 
-**Core Tables**
-- `temp_users`: Temporary storage for unverified registrations (15-min TTL)
-- `users`: Permanent user accounts with seller shop location data
-- `auth_tokens`: Session tokens linked to users with login timestamps
-- `logout_tokens`: Email-confirmed logout tokens with expiry
-- `products`: Product catalog with seller references, images stored as JSON array
-- `cart`: Shopping cart items linked to users and products
-- `orders`: Order records with JSON-serialized product lists
-- `addresses`: Saved delivery addresses with geocoordinates
+### 3. Running the Application
+The application runs automatically via the configured workflow on port 5000.
 
-**Design Decisions**
-- Separate temporary and permanent user tables prevent polluting main user base
-- Shop location fields (latitude, longitude, city, pincode) enable radius-based local search
-- JSON fields for product images and order items provide flexibility without additional tables
-- FCM token field in users table supports push notifications
+## User Workflows
 
-**Alternative Considered**: PostgreSQL with proper relational design for order items. Chose SQLite with JSON for simplicity and portability in development. Migration path exists for production scaling.
+### Buyer Journey
+1. Register → Verify email (15 min window)
+2. Login → Browse products
+3. Add to cart → Checkout with map selection
+4. Place order → Track in Orders page
 
-### File Upload System
+### Seller Journey
+1. Register as seller → Verify email
+2. Login → Access seller dashboard
+3. Add products with images
+4. Manage inventory
 
-**Configuration**
-- Upload folder: `static/uploads`
-- Allowed formats: PNG, JPG, JPEG, GIF, WEBP
-- Maximum file size: 16MB
-- Multiple image upload support per product
+## Security Features
+- Password hashing with Werkzeug
+- HttpOnly cookies for auth tokens
+- CSRF protection via Flask
+- Email verification required
+- Forced logout with email confirmation
+- Secure file upload validation
 
-**Processing**: Werkzeug's `secure_filename` sanitizes uploads, files stored with original names in upload directory, paths stored as JSON array in database.
+## API Endpoints
 
-### Email System
+### Authentication
+- `POST /register`: Create temp user, send verification email
+- `GET /verify/<user_id>`: Verify email and move to main DB
+- `POST /login`: Generate auth token, set cookies
+- `POST /logout-request`: Send logout confirmation email
+- `GET /logout-confirm/<user_id>`: Confirm logout
 
-**Flask-Mail Integration**
-- SMTP server: Gmail (configurable)
-- TLS encryption enabled
-- Use cases: Email verification, logout confirmation, password reset
+### Products
+- `GET /`: Homepage with featured products
+- `GET /products`: Product listing with filters
+- `GET /product/<product_id>`: Product details
+- `POST /seller/add-product`: Add new product (sellers only)
+- `GET /api/categories`: Get all categories
 
-**Configuration**: Supports environment variables for credentials (`MAIL_USERNAME`, `MAIL_PASSWORD`). Falls back gracefully if not configured, showing warnings but allowing app to function.
+### Cart & Orders
+- `POST /cart/add`: Add item to cart
+- `GET /cart`: View cart
+- `POST /cart/remove/<cart_id>`: Remove from cart
+- `POST /checkout`: Place order with delivery address
+- `GET /orders`: View order history
 
-## External Dependencies
-
-### Third-Party APIs & Services
-
-**OpenStreetMap & Leaflet.js**
-- **Purpose**: Interactive map display and address selection
-- **Integration**: Client-side JavaScript library rendering OSM tiles
-- **Features**: Click-to-select location, reverse geocoding via Nominatim API
-- **Rationale**: Free, open-source alternative to Google Maps. No API keys required. Lightweight integration.
-
-**Firebase Cloud Messaging (FCM)**
-- **Purpose**: Push notifications for order updates and real-time alerts
-- **Configuration**: Requires Firebase project setup with API keys
-- **Implementation**: Service worker for background message handling
-- **Status**: Optional - app functions without Firebase configuration
-
-**Nominatim Reverse Geocoding API**
-- **Purpose**: Convert latitude/longitude to human-readable addresses
-- **Provider**: OpenStreetMap's geocoding service
-- **Usage**: Address lookup during map-based selection
-- **Rate Limits**: Subject to Nominatim usage policy
-
-### Python Package Dependencies
-
-**Core Dependencies**
-- `flask`: Web framework
-- `flask-sqlalchemy`: ORM integration
-- `flask-mail`: Email functionality
-- `werkzeug`: Security and utilities
-- `apscheduler`: Background job scheduling
-- `pillow`: Image processing (for future enhancements)
-
-**Database**: SQLite (no external database server required)
-
-### Frontend Libraries (CDN-loaded)
-
-- **Leaflet.js** (v1.9.4): Map rendering
-- **Font Awesome** (v6.4.0): Icon library
-- **Firebase SDK** (v10.7.1): Push notifications
-
-**Rationale for CDN**: Reduces deployment complexity, leverages browser caching, faster updates. Alternative was npm/bundler approach but adds build complexity.
-
-### Environment Variables
-
-**Required for Full Functionality**
-- `MAIL_USERNAME`: SMTP email address
-- `MAIL_PASSWORD`: SMTP password or app-specific token
-- `SESSION_SECRET`: Flask session encryption key (auto-generated if missing)
-
-**Optional**
-- Firebase configuration keys (for push notifications)
-- Custom SMTP server settings
-
-### SMTP Provider Options
-
-**Current Default**: Gmail with app passwords
-**Alternatives Supported**: Any SMTP server (SendGrid, Mailgun, custom)
-**Fallback Behavior**: App warns about missing email config but remains functional for core shopping features
+## Future Enhancements
+- Payment gateway integration (Stripe/PayPal)
+- Product reviews and ratings
+- Real-time inventory management
+- Admin panel for platform management
+- Advanced product recommendation engine
+- Multi-vendor rating system

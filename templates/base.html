@@ -35,6 +35,7 @@
                     {% endif %}
                     
                     <a href="/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+                    <a href="/pickup-items"><i class="fas fa-route"></i> Self-Pickup <span id="pickupCount" class="badge"></span></a>
                     <a href="/orders"><i class="fas fa-box"></i> My Orders</a>
                     <a href="#" onclick="logoutRequest()"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 {% else %}
@@ -93,6 +94,30 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+    
+    <script>
+    async function updatePickupCount() {
+        try {
+            const response = await fetch('/pickup/count');
+            const data = await response.json();
+            const badge = document.getElementById('pickupCount');
+            if (badge && data.count > 0) {
+                badge.textContent = data.count;
+                badge.style.display = 'inline-block';
+            } else if (badge) {
+                badge.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Failed to update pickup count:', error);
+        }
+    }
+    
+    {% if user %}
+    window.addEventListener('DOMContentLoaded', updatePickupCount);
+    setInterval(updatePickupCount, 30000);
+    {% endif %}
+    </script>
+    
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

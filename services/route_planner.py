@@ -10,7 +10,12 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 try:
-    client = genai.Client(api_key="AIzaSyCEJt7be1KEqyLsOLQHiXmTJF36DaaOKfY")
+    api_key = os.environ.get('GEMINI_API_KEY')
+    if api_key:
+        client = genai.Client(api_key=api_key)
+    else:
+        logger.warning("GEMINI_API_KEY not set")
+        client = None
 except Exception as e:
     logger.error(f"Failed to initialize Gemini client: {e}")
     client = None
@@ -176,3 +181,93 @@ def get_route_plan(route_plan_id):
         route_plan_id=route_plan_id).order_by(RoutePlanStop.stop_order).all()
 
     return {'route_plan': route_plan, 'stops': stops}
+
+
+def optimize_route_with_gemini(origin_lat, origin_lng, pickup_items, user_id):
+    """
+    Optimize route for pickup items using Gemini API
+    pickup_items: list of PickupItem objects
+    Returns route plan info
+    """
+    if not client:
+        raise Exception("Gemini API not configured. Please set GEMINI_API_KEY.")
+
+    if not pickup_items:
+        raise Exception("No pickup items to optimize")
+
+    stops_data = []
+    for idx, item in enumerate(pickup_items):
+        stops_data.append({
+            'index': idx,
+            'shop_name': item.shop_name,
+            'shop_address': item.shop_address,
+            'product_id': item.product_id,
+            'location': {
+                'lat': item.shop_lat,
+                'lng': item.shop_lng
+            }
+        })
+
+    prompt = f"""You are a route optimization assistant. Given multiple pickup locations, 
+optimize the route to minimize total travel distance.
+
+Origin: ({origin_lat}, {origin_lng})
+
+Pickup Stops:
+{json.dumps(stops_data, indent=2)}
+
+Please provide an optimized route order that minimizes total travel distance. Consider:
+1. Proximity to each other
+2. Logical path from origin
+3. Avoiding backtracking
+
+Respond with a JSON array of stop indices in the optimal order. For example: [2, 0, 3, 1]
+Only include the array, no additional text.
+"""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"))
+
+        optimized_order = json.loads(response.text)
+        logger.info(f"Gemini optimized order: {optimized_order}")
+
+        route_plan = RoutePlan(
+            user_id=user_id,
+            origin_lat=origin_lat,
+            origin_lng=origin_lng,
+            gemini_request=json.dumps(stops_data),
+            gemini_response=response.text,
+            status='active'
+        )
+        db.session.add(route_plan)
+        db.session.flush()
+
+        for order_idx, stop_idx in enumerate(optimized_order):
+            if isinstance(stop_idx, int) and 0 <= stop_idx < len(pickup_items):
+                item = pickup_items[stop_idx]
+                stop = RoutePlanStop(
+                    route_plan_id=route_plan.id,
+                    seller_id=item.seller_id,
+                    product_id=item.product_id,
+                    stop_order=order_idx + 1,
+                    shop_lat=item.shop_lat,
+                    shop_lng=item.shop_lng,
+                    estimated_arrival=f"Stop {order_idx + 1}"
+                )
+                db.session.add(stop)
+
+        db.session.commit()
+
+        return {
+            'route_plan_id': route_plan.id,
+            'optimized_order': optimized_order
+        }
+
+    except Exception as e:
+        logger.error(f"Route optimization failed: {e}")
+        db.session.rollback()
+        raise e

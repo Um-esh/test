@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Optimized Route - BuddyShop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Your Optimized Pickup Route</h1>
+    
+    <div class="route-container">
+        <div class="map-section">
+            <div id="routeMap" style="height: 500px; border-radius: 8px; overflow: hidden;"></div>
+            <button class="btn-primary btn-block" onclick="openInGoogleMaps()" style="margin-top: 15px;">
+                <i class="fab fa-google"></i> Open in Google Maps
+            </button>
+        </div>
+        
+        <div class="stops-section">
+            <h2>Route Stops</h2>
+            <div class="stops-list">
+                <div class="stop-item origin">
+                    <div class="stop-number">START</div>
+                    <div class="stop-details">
+                        <h3>Your Location</h3>
+                        <p>Origin Point</p>
+                    </div>
+                </div>
+                
+                {% for stop in route.stops %}
+                <div class="stop-item">
+                    <div class="stop-number">{{ stop.stop_order }}</div>
+                    <div class="stop-details">
+                        <h3>{{ stop.shop_name }}</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> {{ stop.shop_address }}</p>
+                        <p><i class="fas fa-box"></i> Product: {{ stop.product_name }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if route.gemini_response %}
+            <div class="ai-insight">
+                <h3><i class="fas fa-robot"></i> AI Route Optimization</h3>
+                <p>This route has been optimized using Gemini AI to minimize travel distance and time.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.route-container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.map-section, .stops-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.stops-section h2 {
+    margin-bottom: 20px;
+}
+
+.stop-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #2874f0;
+}
+
+.stop-item.origin {
+    border-left-color: #28a745;
+    background: #e7f5e9;
+}
+
+.stop-number {
+    width: 40px;
+    height: 40px;
+    background: #2874f0;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.stop-item.origin .stop-number {
+    background: #28a745;
+    font-size: 10px;
+}
+
+.stop-details h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.stop-details p {
+    margin: 3px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.ai-insight {
+    margin-top: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+}
+
+.ai-insight h3 {
+    margin: 0 0 10px 0;
+}
+
+.ai-insight p {
+    margin: 0;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .route-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+let map;
+let markers = [];
+
+const stops = {{ route.stops|tojson }};
+const origin = {
+    lat: {{ route.origin_lat }},
+    lng: {{ route.origin_lng }}
+};
+
+function initMap() {
+    map = L.map('routeMap').setView([origin.lat, origin.lng], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    const originMarker = L.marker([origin.lat, origin.lng], {
+        icon: L.divIcon({
+            className: 'custom-marker origin-marker',
+            html: '<div style="background: #28a745; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">START</div>',
+            iconSize: [30, 30]
+        })
+    }).addTo(map);
+    originMarker.bindPopup('Your Location');
+    
+    const allCoords = [[origin.lat, origin.lng]];
+    
+    stops.forEach((stop, index) => {
+        const marker = L.marker([stop.shop_lat, stop.shop_lng], {
+            icon: L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background: #2874f0; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold;">${stop.stop_order}</div>`,
+                iconSize: [30, 30]
+            })
+        }).addTo(map);
+        marker.bindPopup(`<b>${stop.shop_name}</b><br>${stop.product_name}`);
+        allCoords.push([stop.shop_lat, stop.shop_lng]);
+    });
+    
+    const polyline = L.polyline(allCoords, {
+        color: '#2874f0',
+        weight: 3,
+        opacity: 0.7
+    }).addTo(map);
+    
+    map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+}
+
+function openInGoogleMaps() {
+    let waypoints = '';
+    stops.forEach(stop => {
+        waypoints += `${stop.shop_lat},${stop.shop_lng}/`;
+    });
+    
+    const url = `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${waypoints}`;
+    window.open(url, '_blank');
+}
+
+window.addEventListener('DOMContentLoaded', initMap);
+</script>
+{% endblock %}

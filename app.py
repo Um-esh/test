@@ -9,7 +9,7 @@ from datetime import datetime
 import math
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from models import db, User, Product, Cart, Order, Address, TempUser, AuthToken, Review, RoutePlan, RoutePlanStop
+from models import db, User, Product, Cart, Order, Address, TempUser, AuthToken, Review, RoutePlan, RoutePlanStop, PickupItem
 from database import init_db, cleanup_expired_temp_users
 from auth import create_temp_user, verify_and_move_user, create_auth_token, verify_token, logout_user, create_logout_token, verify_logout_token
 
@@ -23,8 +23,8 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
 app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
-app.config['MAIL_USERNAME'] = 'srms.inventory@gmail.com'
-app.config['MAIL_PASSWORD'] = 'ilslkasxuyqcqnke'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@buddyshop.com')
 
 db.init_app(app)
@@ -831,6 +831,209 @@ def save_fcm_token():
         return jsonify({'success': True, 'message': 'FCM token saved'})
 
     return jsonify({'success': False, 'message': 'No token provided'})
+
+@app.route('/pickup/add', methods=['POST'])
+def add_pickup_item():
+    user = get_current_user()
+
+    if not user:
+        return jsonify({'success': False, 'message': 'Please login first'}), 401
+
+    data = request.json
+    product_id = data.get('product_id')
+    quantity = data.get('quantity', 1)
+
+    product = Product.query.filter_by(product_id=product_id).first()
+    if not product:
+        return jsonify({'success': False, 'message': 'Product not found'})
+
+    seller = User.query.filter_by(user_id=product.seller_id).first()
+    if not seller or not seller.shop_latitude or not seller.shop_longitude:
+        return jsonify({'success': False, 'message': 'Seller location not available for pickup'})
+
+    existing = PickupItem.query.filter_by(user_id=user['user_id'], product_id=product_id).first()
+
+    if existing:
+        existing.quantity += quantity
+        message = 'Quantity updated for pickup!'
+    else:
+        new_pickup_item = PickupItem(
+            user_id=user['user_id'],
+            product_id=product_id,
+            seller_id=product.seller_id,
+            quantity=quantity,
+            shop_lat=seller.shop_latitude,
+            shop_lng=seller.shop_longitude,
+            shop_name=seller.shop_name,
+            shop_address=seller.shop_address
+        )
+        db.session.add(new_pickup_item)
+        message = 'Added for self-pickup!'
+
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': message})
+
+@app.route('/pickup-items')
+def pickup_items():
+    user = get_current_user()
+
+    if not user:
+        return redirect(url_for('login'))
+
+    pickup_list = db.session.query(PickupItem, Product).join(
+        Product, PickupItem.product_id == Product.product_id
+    ).filter(PickupItem.user_id == user['user_id']).all()
+
+    pickup_data = []
+    for pickup_item, product in pickup_list:
+        item_dict = {
+            'id': pickup_item.id,
+            'product_id': pickup_item.product_id,
+            'quantity': pickup_item.quantity,
+            'name': product.name,
+            'price': product.price,
+            'images': json.loads(product.images) if product.images else [],
+            'shop_name': pickup_item.shop_name,
+            'shop_address': pickup_item.shop_address,
+            'shop_lat': pickup_item.shop_lat,
+            'shop_lng': pickup_item.shop_lng
+        }
+        pickup_data.append(item_dict)
+
+    return render_template('pickup_items.html', pickup_items=pickup_data, user=user)
+
+@app.route('/pickup/remove/<int:pickup_id>', methods=['POST'])
+def remove_pickup_item(pickup_id):
+    user = get_current_user()
+
+    if not user:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    pickup_item = PickupItem.query.filter_by(id=pickup_id, user_id=user['user_id']).first()
+    if pickup_item:
+        db.session.delete(pickup_item)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Removed from pickup list'})
+    
+    return jsonify({'success': False, 'message': 'Item not found'})
+
+@app.route('/pickup/count')
+def pickup_count():
+    user = get_current_user()
+
+    if not user:
+        return jsonify({'count': 0})
+
+    count = PickupItem.query.filter_by(user_id=user['user_id']).count()
+    return jsonify({'count': count})
+
+@app.route('/pickup/create-route', methods=['POST'])
+def create_route():
+    user = get_current_user()
+
+    if not user:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    data = request.json
+    origin_lat = data.get('origin_lat')
+    origin_lng = data.get('origin_lng')
+
+    pickup_list = PickupItem.query.filter_by(user_id=user['user_id']).all()
+
+    if not pickup_list:
+        return jsonify({'success': False, 'message': 'No pickup items found'})
+
+    try:
+        from services.route_planner import optimize_route_with_gemini
+        
+        route_info = optimize_route_with_gemini(
+            origin_lat=origin_lat,
+            origin_lng=origin_lng,
+            pickup_items=pickup_list,
+            user_id=user['user_id']
+        )
+
+        return jsonify({
+            'success': True,
+            'route_plan_id': route_info['route_plan_id'],
+            'message': 'Route created successfully!'
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error creating route: {str(e)}'})
+
+@app.route('/route/<int:route_plan_id>')
+def view_route(route_plan_id):
+    user = get_current_user()
+
+    if not user:
+        return redirect(url_for('login'))
+
+    route_plan = RoutePlan.query.filter_by(id=route_plan_id, user_id=user['user_id']).first()
+
+    if not route_plan:
+        return "Route not found", 404
+
+    stops = RoutePlanStop.query.filter_by(route_plan_id=route_plan_id).order_by(RoutePlanStop.stop_order).all()
+
+    stops_data = []
+    for stop in stops:
+        seller = User.query.filter_by(user_id=stop.seller_id).first()
+        product = Product.query.filter_by(product_id=stop.product_id).first()
+        
+        stop_dict = {
+            'stop_order': stop.stop_order,
+            'shop_name': seller.shop_name if seller else 'Unknown',
+            'shop_address': seller.shop_address if seller else '',
+            'shop_lat': stop.shop_lat,
+            'shop_lng': stop.shop_lng,
+            'product_name': product.name if product else 'Unknown',
+            'estimated_arrival': stop.estimated_arrival
+        }
+        stops_data.append(stop_dict)
+
+    route_data = {
+        'id': route_plan.id,
+        'origin_lat': route_plan.origin_lat,
+        'origin_lng': route_plan.origin_lng,
+        'gemini_response': route_plan.gemini_response,
+        'stops': stops_data
+    }
+
+    return render_template('route_view.html', route=route_data, user=user)
+
+@app.route('/seller/update-order-status', methods=['POST'])
+def update_order_status():
+    user = get_current_user()
+
+    if not user or user['user_type'] != 'seller':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    data = request.json
+    order_id = data.get('order_id')
+    status = data.get('status')
+
+    if status not in ['accepted', 'rejected', 'completed']:
+        return jsonify({'success': False, 'message': 'Invalid status'})
+
+    order = Order.query.filter_by(order_id=order_id).first()
+    if not order:
+        return jsonify({'success': False, 'message': 'Order not found'})
+
+    products_data = json.loads(order.products)
+    seller_has_product = any(
+        Product.query.filter_by(product_id=p['product_id'], seller_id=user['user_id']).first()
+        for p in products_data
+    )
+
+    if not seller_has_product:
+        return jsonify({'success': False, 'message': 'Unauthorized to modify this order'})
+
+    order.status = status
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': f'Order {status} successfully!'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

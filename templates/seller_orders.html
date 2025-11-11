@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Seller Orders - BuddyShop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Orders</h1>
+    
+    {% if orders|length > 0 %}
+    <div class="orders-list">
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <div>
+                    <h3>Order #{{ order.order_id }}</h3>
+                    <p class="order-date">{{ order.created_at }}</p>
+                </div>
+                <div class="order-status status-{{ order.status }}">
+                    {{ order.status|capitalize }}
+                </div>
+            </div>
+            
+            <div class="order-items">
+                {% for product in order.products %}
+                <div class="order-item">
+                    <span>{{ product.name }}</span>
+                    <span>Qty: {{ product.quantity }}</span>
+                    <span>₹{{ product.price }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="order-footer">
+                <div class="order-address">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ order.delivery_address }}
+                </div>
+                <div class="order-total">
+                    <strong>Total: ₹{{ order.total_amount }}</strong>
+                </div>
+            </div>
+            
+            {% if order.status == 'pending' %}
+            <div class="order-actions">
+                <button class="btn-success" onclick="updateOrderStatus('{{ order.order_id }}', 'accepted')">
+                    <i class="fas fa-check"></i> Accept Order
+                </button>
+                <button class="btn-danger" onclick="updateOrderStatus('{{ order.order_id }}', 'rejected')">
+                    <i class="fas fa-times"></i> Reject Order
+                </button>
+            </div>
+            {% elif order.status == 'accepted' %}
+            <div class="order-actions">
+                <button class="btn-primary" onclick="updateOrderStatus('{{ order.order_id }}', 'completed')">
+                    <i class="fas fa-check-circle"></i> Mark as Completed
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-orders">
+        <i class="fas fa-box-open"></i>
+        <h2>No orders yet</h2>
+        <p>Your products haven't been ordered yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function updateOrderStatus(orderId, status) {
+    const confirmMsg = status === 'accepted' ? 'Accept this order?' : 
+                      status === 'rejected' ? 'Reject this order?' : 
+                      'Mark this order as completed?';
+    
+    if (!confirm(confirmMsg)) return;
+    
+    try {
+        const response = await fetch('/seller/update-order-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                order_id: orderId,
+                status: status
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('Failed to update order status', 'error');
+    }
+}
+</script>
+
+<style>
+.order-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-success:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.status-pending {
+    background: #ffc107;
+    color: #333;
+}
+
+.status-accepted {
+    background: #28a745;
+    color: white;
+}
+
+.status-rejected {
+    background: #dc3545;
+    color: white;
+}
+
+.status-completed {
+    background: #6c757d;
+    color: white;
+}
+</style>
+{% endblock %}

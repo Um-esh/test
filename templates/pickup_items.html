@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Self-Pickup Items - BuddyShop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Self-Pickup Items</h1>
+    
+    {% if pickup_items|length > 0 %}
+    <div class="pickup-header">
+        <p>You have {{ pickup_items|length }} item(s) selected for self-pickup</p>
+        <button class="btn-primary" onclick="createRoute()">
+            <i class="fas fa-route"></i> Create Optimized Route
+        </button>
+    </div>
+    
+    <div class="pickup-container">
+        <div class="pickup-items-list">
+            {% for item in pickup_items %}
+            <div class="pickup-item-card">
+                <div class="pickup-item-image">
+                    {% if item.images and item.images|length > 0 %}
+                        <img src="{{ item.images[0] }}" alt="{{ item.name }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/100x100?text=No+Image" alt="{{ item.name }}">
+                    {% endif %}
+                </div>
+                
+                <div class="pickup-item-details">
+                    <h3>{{ item.name }}</h3>
+                    <div class="pickup-item-price">₹{{ item.price }}</div>
+                    <div class="pickup-quantity">Quantity: {{ item.quantity }}</div>
+                    <div class="pickup-shop">
+                        <i class="fas fa-store"></i> {{ item.shop_name }}
+                    </div>
+                    <div class="pickup-address">
+                        <i class="fas fa-map-marker-alt"></i> {{ item.shop_address }}
+                    </div>
+                </div>
+                
+                <button class="btn-remove" onclick="removePickupItem({{ item.id }})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-pickup">
+        <i class="fas fa-route"></i>
+        <h2>No items selected for pickup</h2>
+        <p>Browse products in local mode and select items for self-pickup!</p>
+        <a href="/home?mode=local" class="btn-primary">Browse Local Products</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.pickup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.pickup-header p {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.pickup-item-card {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.pickup-item-image img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.pickup-item-details {
+    flex: 1;
+}
+
+.pickup-item-details h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.pickup-item-price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2874f0;
+    margin: 5px 0;
+}
+
+.pickup-quantity {
+    color: #666;
+    margin: 5px 0;
+}
+
+.pickup-shop {
+    color: #28a745;
+    font-weight: 600;
+    margin: 5px 0;
+}
+
+.pickup-address {
+    color: #666;
+    font-size: 14px;
+}
+
+.btn-remove {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-remove:hover {
+    background: #c82333;
+}
+
+.empty-pickup {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-pickup i {
+    font-size: 80px;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.empty-pickup h2 {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.empty-pickup p {
+    color: #999;
+    margin-bottom: 30px;
+}
+</style>
+
+<script>
+async function removePickupItem(pickupId) {
+    if (!confirm('Remove this item from pickup list?')) return;
+    
+    try {
+        const response = await fetch(`/pickup/remove/${pickupId}`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('Failed to remove item', 'error');
+    }
+}
+
+async function createRoute() {
+    if (!navigator.geolocation) {
+        showNotification('Geolocation is not supported by your browser', 'error');
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(async function(position) {
+        try {
+            const response = await fetch('/pickup/create-route', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    origin_lat: position.coords.latitude,
+                    origin_lng: position.coords.longitude
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showNotification(data.message, 'success');
+                setTimeout(() => {
+                    window.location.href = `/route/${data.route_plan_id}`;
+                }, 1000);
+            } else {
+                showNotification(data.message, 'error');
+            }
+        } catch (error) {
+            showNotification('Failed to create route: ' + error.message, 'error');
+        }
+    }, function(error) {
+        showNotification('Please enable location access to create route', 'error');
+    });
+}
+</script>
+{% endblock %}
