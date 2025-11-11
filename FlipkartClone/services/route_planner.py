@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 try:
-    client = genai.Client(api_key="")
+    client = genai.Client(api_key="AIzaSyCEJt7be1KEqyLsOLQHiXmTJF36DaaOKfY")
 except Exception as e:
     logger.error(f"Failed to initialize Gemini client: {e}")
     client = None
